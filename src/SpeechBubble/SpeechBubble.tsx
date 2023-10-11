@@ -21,9 +21,9 @@ type SpeechBubbleShape = TLBaseShape<
 export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   static type = "speech-bubble" as const;
 
-  override isAspectRatioLocked = (_shape: ICardShape) => false;
-  override canResize = (_shape: ICardShape) => true;
-  override canBind = (_shape: ICardShape) => true;
+  override isAspectRatioLocked = (_shape: SpeechBubbleShape) => false;
+  override canResize = (_shape: SpeechBubbleShape) => true;
+  override canBind = (_shape: SpeechBubbleShape) => true;
 
   getGeometry(shape: SpeechBubbleShape): Geometry2d {
     return new Ellipse2d({
