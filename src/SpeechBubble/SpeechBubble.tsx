@@ -39,7 +39,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       h: 100,
       color: "black",
       weight: "regular",
-      strokeWidth: 10,
+      strokeWidth: 5,
     };
   }
 
@@ -53,12 +53,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       rx * 2
     },0a${rx},${ry},0,1,1,-${rx * 2},0`;
     return (
-      <svg>
+      <svg className="tl-svg-container">
         <path
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
-          fill="blue"
+          fill="green"
         />
       </svg>
     );
