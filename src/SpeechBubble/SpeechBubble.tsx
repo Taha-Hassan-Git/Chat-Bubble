@@ -63,12 +63,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   getDefaultProps(): SpeechBubbleShape["props"] {
     return {
-      w: 100,
+      w: 180,
       h: 100,
-      isFilled: false,
+      isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 2,
+      strokeWidth: 5,
       handles: {
         start: {
           id: "start",
@@ -100,7 +100,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
-          fill="blue"
+          fill="none"
         />
       </svg>
     );
@@ -110,7 +110,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return <path d={getOvalIndicatorPath(shape.props.w, shape.props.h)} />;
   }
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
-    console.log({ info });
     return resizeBox(shape, info);
   };
 }
