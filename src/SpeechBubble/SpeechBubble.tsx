@@ -7,8 +7,6 @@ import {
   Polyline2d,
   Vec2d,
   sortByIndex,
-  deepCopy,
-  Ellipse2d,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -16,6 +14,7 @@ type SpeechBubbleShape = TLBaseShape<
   {
     w: number;
     h: number;
+    strokeWidth: number;
     isFilled: boolean;
     handles: {
       start: {
@@ -71,15 +70,34 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       isFilled: false,
       size: "m",
       color: "black",
-      weight: "regular",
-      strokeWidth: 10,
+      strokeWidth: 2,
+      handles: {
+        start: {
+          id: "start",
+          type: "vertex",
+          canBind: false,
+          canSnap: true,
+          index: "a1",
+          x: 0,
+          y: 0,
+        },
+        end: {
+          id: "end",
+          type: "vertex",
+          canBind: false,
+          canSnap: true,
+          index: "a2",
+          x: 100,
+          y: 100,
+        },
+      },
     };
   }
 
   component(shape: SpeechBubbleShape) {
     const d = getOvalIndicatorPath(shape.props.w, shape.props.h);
     return (
-      <svg>
+      <svg className="tl-svg-container">
         <path
           d={d}
           stroke={shape.props.color}
@@ -94,6 +112,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return <path d={getOvalIndicatorPath(shape.props.w, shape.props.h)} />;
   }
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
+    console.log({ info });
     return resizeBox(shape, info);
   };
 }
