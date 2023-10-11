@@ -4,9 +4,7 @@ import {
   TLBaseShape,
   TLOnResizeHandler,
   resizeBox,
-  Polyline2d,
-  Vec2d,
-  sortByIndex,
+  Stadium2d,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -56,11 +54,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getGeometry(shape: SpeechBubbleShape): Geometry2d {
-    const { handles } = shape.props;
-    const handlePoints = Object.values(handles)
-      .sort(sortByIndex)
-      .map(Vec2d.From);
-    return new Polyline2d({ points: handlePoints });
+    return new Stadium2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: shape.props.isFilled,
+    });
   }
 
   getDefaultProps(): SpeechBubbleShape["props"] {
