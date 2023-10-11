@@ -98,11 +98,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const d = getOvalIndicatorPath(shape.props.w, shape.props.h);
     return (
       <svg className="tl-svg-container">
+      <svg className="tl-svg-container">
         <path
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
-          fill="blue"
+          fill="green"
         />
       </svg>
     );
