@@ -4,9 +4,7 @@ import {
   TLBaseShape,
   TLOnResizeHandler,
   resizeBox,
-  Polyline2d,
-  Vec2d,
-  sortByIndex,
+  Stadium2d,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -56,21 +54,21 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getGeometry(shape: SpeechBubbleShape): Geometry2d {
-    const { handles } = shape.props;
-    const handlePoints = Object.values(handles)
-      .sort(sortByIndex)
-      .map(Vec2d.From);
-    return new Polyline2d({ points: handlePoints });
+    return new Stadium2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: shape.props.isFilled,
+    });
   }
 
   getDefaultProps(): SpeechBubbleShape["props"] {
     return {
-      w: 100,
+      w: 180,
       h: 100,
-      isFilled: false,
+      isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 2,
+      strokeWidth: 5,
       handles: {
         start: {
           id: "start",
@@ -103,7 +101,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
-          fill="green"
+          fill="none"
         />
       </svg>
     );
@@ -113,7 +111,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return <path d={getOvalIndicatorPath(shape.props.w, shape.props.h)} />;
   }
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
-    console.log({ info });
     return resizeBox(shape, info);
   };
 }
