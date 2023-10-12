@@ -6,9 +6,9 @@ import {
   resizeBox,
   Vec2d,
   Polygon2d,
-  TLLineShape,
-  getIndexBetween,
   sortByIndex,
+  TLOnHandleChangeHandler,
+  deepCopy,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -72,8 +72,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getDefaultProps(): SpeechBubbleShape["props"] {
-    const tailHeight = -30;
-    const tailWidth = 10;
+    const tailHeight = -80;
+    const tailWidth = 30;
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
@@ -146,6 +146,20 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
     return sortedHandles;
   }
+  override onHandleChange: TLOnHandleChangeHandler<SpeechBubbleShape> = (
+    shape,
+    { handle }
+  ) => {
+    const next = deepCopy(shape);
+
+    (next.props.handles as any)[handle.id] = {
+      ...(next.props.handles as any)[handle.id],
+      x: handle.x,
+      y: handle.y,
+    };
+
+    return next;
+  };
 
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
