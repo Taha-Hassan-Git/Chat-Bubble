@@ -6,6 +6,9 @@ import {
   resizeBox,
   Vec2d,
   Polygon2d,
+  TLLineShape,
+  getIndexBetween,
+  sortByIndex,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -20,7 +23,7 @@ type SpeechBubbleShape = TLBaseShape<
     handles: {
       handle1: {
         id: string;
-        type: string;
+        type: "vertex";
         canBind: boolean;
         canSnap: boolean;
         index: string;
@@ -29,7 +32,7 @@ type SpeechBubbleShape = TLBaseShape<
       };
       handle2: {
         id: string;
-        type: string;
+        type: "vertex";
         canBind: boolean;
         canSnap: boolean;
         index: string;
@@ -38,7 +41,7 @@ type SpeechBubbleShape = TLBaseShape<
       };
       handle3: {
         id: string;
-        type: string;
+        type: "vertex";
         canBind: boolean;
         canSnap: boolean;
         index: string;
@@ -68,31 +71,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canBind = (_shape: SpeechBubbleShape) => true;
 
-  getGeometry(shape: SpeechBubbleShape): Geometry2d {
-    const {
-      w,
-      h,
-      tailHeight,
-      tailWidth,
-      handles: { handle1 },
-    } = shape.props;
-    return new Polygon2d({
-      points: [
-        new Vec2d(0, tailHeight),
-        new Vec2d(handle1.x, tailHeight),
-        new Vec2d(-w, -tailHeight),
-        new Vec2d(-w, -h),
-        new Vec2d(w, -tailHeight),
-        new Vec2d(handle1.x + tailWidth, -tailHeight),
-      ],
-      isFilled: shape.props.isFilled,
-    });
-  }
-
   getDefaultProps(): SpeechBubbleShape["props"] {
+    const tailHeight = -30;
+    const tailWidth = 10;
     return {
-      tailHeight: 30,
-      tailWidth: 10,
+      tailHeight: tailHeight,
+      tailWidth: tailWidth,
       w: 100,
       h: 130,
       isFilled: true,
@@ -108,7 +92,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           index: "a1",
           x: -30,
           // tailHeight
-          y: 60,
+          y: tailHeight,
         },
         handle2: {
           id: "handle2",
@@ -117,9 +101,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canBind: false,
           canSnap: true,
           // handle1.x + tailWidth
-          x: -30 + 10,
+          x: -30 + tailWidth,
           //tailHeight
-          y: 30,
+          y: tailHeight,
         },
         handle3: {
           id: "handle3",
@@ -129,10 +113,38 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canSnap: true,
           x: 0,
           //tailHeight
-          y: 30,
+          y: -tailHeight,
         },
       },
     };
+  }
+
+  getGeometry(shape: SpeechBubbleShape): Geometry2d {
+    const {
+      w,
+      h,
+      tailHeight,
+      handles: { handle1, handle2, handle3 },
+    } = shape.props;
+    return new Polygon2d({
+      points: [
+        new Vec2d(handle3.x, handle3.y),
+        new Vec2d(handle1.x, handle1.y),
+        new Vec2d(-w, -tailHeight),
+        new Vec2d(-w, -h),
+        new Vec2d(w, -tailHeight),
+        new Vec2d(handle2.x, handle2.y),
+      ],
+      isFilled: shape.props.isFilled,
+    });
+  }
+
+  override getHandles(shape: SpeechBubbleShape) {
+    const handles = shape.props.handles;
+    console.log("handles", handles);
+    const sortedHandles = Object.values(handles).sort(sortByIndex);
+
+    return sortedHandles;
   }
 
   component(shape: SpeechBubbleShape) {
@@ -162,18 +174,17 @@ export function getSpeechBubblePath(shape: SpeechBubbleShape) {
     w,
     h,
     tailHeight,
-    tailWidth,
-    handles: { handle1 },
+    handles: { handle1, handle2, handle3 },
   } = shape.props;
 
   const d = `
-            M${0},${tailHeight}
-            L${handle1.x},-${tailHeight}
-            L-${w},-${tailHeight}
+            M${handle3.x},${handle3.y}
+            L${handle1.x},${handle1.y}
+            L-${w},${tailHeight}
             L-${w},-${h}
             L${w},-${h}
-            L${w},-${tailHeight}
-            L${handle1.x + tailWidth},-${tailHeight}
+            L${w},${tailHeight}
+            L${handle2.x},${handle2.y}
             z`;
 
   return d;
