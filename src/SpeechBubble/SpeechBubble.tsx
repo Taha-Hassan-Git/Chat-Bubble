@@ -5,6 +5,7 @@ import {
   TLOnResizeHandler,
   resizeBox,
   Stadium2d,
+  Stadium2d,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -70,6 +71,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       height: shape.props.h,
       isFilled: shape.props.isFilled,
     });
+    return new Stadium2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: shape.props.isFilled,
+    });
   }
 
   getDefaultProps(): SpeechBubbleShape["props"] {
@@ -81,6 +87,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       isFilled: true,
       size: "m",
       color: "black",
+      strokeWidth: 5,
       strokeWidth: 5,
       handles: {
         handle1: {
@@ -122,6 +129,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
+          fill="none"
           fill="none"
         />
       </svg>
