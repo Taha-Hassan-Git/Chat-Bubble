@@ -4,8 +4,8 @@ import {
   TLBaseShape,
   TLOnResizeHandler,
   resizeBox,
-  Stadium2d,
-  Stadium2d,
+  Vec2d,
+  Polygon2d,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -66,14 +66,22 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getGeometry(shape: SpeechBubbleShape): Geometry2d {
-    return new Stadium2d({
-      width: shape.props.w,
-      height: shape.props.h,
-      isFilled: shape.props.isFilled,
-    });
-    return new Stadium2d({
-      width: shape.props.w,
-      height: shape.props.h,
+    const {
+      w,
+      h,
+      tailHeight,
+      tailWidth,
+      handles: { handle1 },
+    } = shape.props;
+    return new Polygon2d({
+      points: [
+        new Vec2d(0, 0),
+        new Vec2d(handle1.x, tailHeight),
+        new Vec2d(-w, -tailHeight),
+        new Vec2d(-w, -h),
+        new Vec2d(w, -tailHeight),
+        new Vec2d(handle1.x + tailWidth, -tailHeight),
+      ],
       isFilled: shape.props.isFilled,
     });
   }
@@ -87,7 +95,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 5,
       strokeWidth: 5,
       handles: {
         handle1: {
@@ -129,7 +136,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
-          fill="none"
           fill="none"
         />
       </svg>
