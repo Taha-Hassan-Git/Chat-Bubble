@@ -4,20 +4,20 @@ import {
   TLBaseShape,
   TLOnResizeHandler,
   resizeBox,
-  Polyline2d,
-  Vec2d,
-  sortByIndex,
+  Stadium2d,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
   "speech-bubble",
   {
+    tailHeight: number;
+    tailWidth: number;
     w: number;
     h: number;
     strokeWidth: number;
     isFilled: boolean;
     handles: {
-      start: {
+      handle1: {
         id: string;
         type: string;
         canBind: boolean;
@@ -26,7 +26,16 @@ type SpeechBubbleShape = TLBaseShape<
         x: number;
         y: number;
       };
-      end: {
+      handle2: {
+        id: string;
+        type: string;
+        canBind: boolean;
+        canSnap: boolean;
+        index: string;
+        x: number;
+        y: number;
+      };
+      handle3: {
         id: string;
         type: string;
         canBind: boolean;
@@ -56,89 +65,95 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getGeometry(shape: SpeechBubbleShape): Geometry2d {
-    const { handles } = shape.props;
-    const handlePoints = Object.values(handles)
-      .sort(sortByIndex)
-      .map(Vec2d.From);
-    return new Polyline2d({ points: handlePoints });
+    return new Stadium2d({
+      width: shape.props.w,
+      height: shape.props.h,
+      isFilled: shape.props.isFilled,
+    });
   }
 
   getDefaultProps(): SpeechBubbleShape["props"] {
     return {
+      tailHeight: 60,
+      tailWidth: 10,
       w: 100,
-      h: 100,
-      isFilled: false,
+      h: 130,
+      isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 2,
+      strokeWidth: 5,
       handles: {
-        start: {
-          id: "start",
+        handle1: {
+          id: "handle1",
           type: "vertex",
           canBind: false,
           canSnap: true,
           index: "a1",
-          x: 0,
-          y: 0,
+          x: -30,
+          y: 60,
         },
-        end: {
-          id: "end",
+        handle2: {
+          id: "handle2",
           type: "vertex",
+          index: "a2",
           canBind: false,
           canSnap: true,
-          index: "a2",
-          x: 100,
-          y: 100,
+          x: -30 + 10,
+          y: 60,
+        },
+        handle3: {
+          id: "handle3",
+          type: "vertex",
+          index: "a3",
+          canBind: false,
+          canSnap: true,
+          x: 0,
+          y: 60,
         },
       },
     };
   }
 
   component(shape: SpeechBubbleShape) {
-    const d = getOvalIndicatorPath(shape.props.w, shape.props.h);
+    const d = getSpeechBubblePath(shape);
     return (
-      <svg className="tl-svg-container">
       <svg className="tl-svg-container">
         <path
           d={d}
           stroke={shape.props.color}
           strokeWidth={shape.props.strokeWidth}
-          fill="green"
+          fill="none"
         />
       </svg>
     );
   }
 
   indicator(shape: SpeechBubbleShape) {
-    return <path d={getOvalIndicatorPath(shape.props.w, shape.props.h)} />;
+    return <path d={getSpeechBubblePath(shape)} />;
   }
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
-    console.log({ info });
     return resizeBox(shape, info);
   };
 }
 
-export function getOvalIndicatorPath(w: number, h: number) {
-  let d: string;
+export function getSpeechBubblePath(shape: SpeechBubbleShape) {
+  const {
+    w,
+    h,
+    tailHeight,
+    tailWidth,
+    handles: { handle1 },
+  } = shape.props;
 
-  if (h > w) {
-    const offset = w / 2;
-    d = `
-    M0,${offset}
-    a${offset},${offset},0,1,1,${offset * 2},0
-    L${w},${h - offset}
-    a${offset},${offset},0,1,1,-${offset * 2},0
-    Z`;
-  } else {
-    const offset = h / 2;
-    d = `
-    M${offset},0
-    L${w - offset},0
-    a${offset},${offset},0,1,1,0,${offset * 2}
-    L${offset},${h}
-    a${offset},${offset},0,1,1,0,${-offset * 2}
-    Z`;
-  }
+  const d = `
+            M${0},${0}
+            L${handle1.x},-${tailHeight}
+            L-${w},-${tailHeight}
+            L-${w},-${h}
+            L${w},-${h}
+            L${w},-${tailHeight}
+            L${handle1.x + tailWidth},-${tailHeight}
+            z`;
 
   return d;
 }
