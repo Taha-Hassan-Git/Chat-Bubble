@@ -61,8 +61,11 @@ export const STROKE_SIZES: Record<string, number> = {
 export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   static type = "speech-bubble" as const;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override isAspectRatioLocked = (_shape: SpeechBubbleShape) => false;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canResize = (_shape: SpeechBubbleShape) => true;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getGeometry(shape: SpeechBubbleShape): Geometry2d {
@@ -75,7 +78,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     } = shape.props;
     return new Polygon2d({
       points: [
-        new Vec2d(0, 0),
+        new Vec2d(0, tailHeight),
         new Vec2d(handle1.x, tailHeight),
         new Vec2d(-w, -tailHeight),
         new Vec2d(-w, -h),
@@ -88,7 +91,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   getDefaultProps(): SpeechBubbleShape["props"] {
     return {
-      tailHeight: 60,
+      tailHeight: 30,
       tailWidth: 10,
       w: 100,
       h: 130,
@@ -104,6 +107,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canSnap: true,
           index: "a1",
           x: -30,
+          // tailHeight
           y: 60,
         },
         handle2: {
@@ -112,8 +116,10 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           index: "a2",
           canBind: false,
           canSnap: true,
+          // handle1.x + tailWidth
           x: -30 + 10,
-          y: 60,
+          //tailHeight
+          y: 30,
         },
         handle3: {
           id: "handle3",
@@ -122,7 +128,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canBind: false,
           canSnap: true,
           x: 0,
-          y: 60,
+          //tailHeight
+          y: 30,
         },
       },
     };
@@ -160,7 +167,7 @@ export function getSpeechBubblePath(shape: SpeechBubbleShape) {
   } = shape.props;
 
   const d = `
-            M${0},${0}
+            M${0},${tailHeight}
             L${handle1.x},-${tailHeight}
             L-${w},-${tailHeight}
             L-${w},-${h}
