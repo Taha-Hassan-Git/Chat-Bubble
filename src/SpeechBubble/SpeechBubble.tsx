@@ -22,7 +22,7 @@ type SpeechBubbleShape = TLBaseShape<
     isFilled: boolean;
     handles: {
       handle1: {
-        id: string;
+        id: "handle1" | "handle2" | "handle3";
         type: "vertex";
         canBind: boolean;
         canSnap: boolean;
@@ -31,7 +31,7 @@ type SpeechBubbleShape = TLBaseShape<
         y: number;
       };
       handle2: {
-        id: string;
+        id: "handle1" | "handle2" | "handle3";
         type: "vertex";
         canBind: boolean;
         canSnap: boolean;
@@ -40,7 +40,7 @@ type SpeechBubbleShape = TLBaseShape<
         y: number;
       };
       handle3: {
-        id: string;
+        id: "handle1" | "handle2" | "handle3";
         type: "vertex";
         canBind: boolean;
         canSnap: boolean;
@@ -72,8 +72,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getDefaultProps(): SpeechBubbleShape["props"] {
-    const tailHeight = -80;
-    const tailWidth = 30;
+    const tailHeight = -20;
+    const tailWidth = 15;
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
@@ -152,11 +152,18 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   ) => {
     const next = deepCopy(shape);
 
-    (next.props.handles as any)[handle.id] = {
-      ...(next.props.handles as any)[handle.id],
-      x: handle.x,
-      y: handle.y,
-    };
+    if (handle.id === "handle1" || handle.id === "handle2") {
+      next.props.handles[handle.id] = {
+        ...next.props.handles[handle.id],
+        x: handle.x,
+      };
+    } else {
+      next.props.handles["handle3"] = {
+        ...next.props.handles["handle3"],
+        x: handle.x,
+        y: handle.y,
+      };
+    }
 
     return next;
   };
