@@ -6,10 +6,8 @@ import {
   resizeBox,
   Vec2d,
   Polygon2d,
-  sortByIndex,
   TLOnHandleChangeHandler,
   deepCopy,
-  TLHandle,
   TLShapeId,
 } from "@tldraw/tldraw";
 
@@ -125,6 +123,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const handlesArray = Object.values(handles);
     return handlesArray;
   }
+
+  // We use this property to keep track of the previous handle position
+  // it's sneaky, but it works!
   previousHandle: {
     shapeId: TLShapeId;
     handleId: string;
@@ -138,8 +139,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const next = deepCopy(shape);
 
     if (
+      // if there's no previous handle, set it to the current handle pos
       !this.previousHandle ||
+      //if the previous handle is different than the current handle, we don't want
+      // to calculate the diff, so we reset
       this.previousHandle.shapeId !== shape.id ||
+      //if we grab a different handle, we don't want to calculate the diff, so we reset
       this.previousHandle.handleId !== handle.id
     ) {
       this.previousHandle = {
@@ -151,14 +156,23 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     }
 
     //Does the user want to move the tail or make it wider?
-    const diffX = handle.x - this.previousHandle.x;
-    const diffY = handle.y - this.previousHandle.y;
-
+    let diffX = handle.x - this.previousHandle.x;
+    let diffY = handle.y - this.previousHandle.y;
     console.log({ diffX, diffY });
-
     //Check handle, and check bounds
     if (handle.id === "handle1") {
+      //speed limit on the diff, this is to fix a bug when the user would
+      //grab the same handle again and the diff would be huge
+      if (
+        Math.abs(handle.x - this.previousHandle.x) > 20 ||
+        Math.abs(handle.y - this.previousHandle.y) > 20
+      ) {
+        diffX = 20;
+        diffY = 20;
+      }
+
       //Moving the tail
+
       if (Math.abs(diffX) > Math.abs(diffY)) {
         next.props.handles[handle.id] = {
           ...next.props.handles[handle.id],
@@ -173,23 +187,43 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
         }
       }
       //Making the tail wider
-      //We should check bounds here too
+      //We need to check the corners of the tail to make sure it doesn't go past the corners of the box
       const corner1 = shape.props.handles.handle1.x + shape.props.tailWidth / 2;
       const corner2 = shape.props.handles.handle1.x - shape.props.tailWidth / 2;
 
+      //Check if we're moving up or down to increase/decrease the tail width
       if (Math.abs(diffY) > Math.abs(diffX) && diffY > 0) {
         next.props.tailWidth -= Math.abs(diffY);
       } else if (Math.abs(diffY) > Math.abs(diffX) && diffY < 0) {
         next.props.tailWidth += Math.abs(diffY);
       }
-      if (next.props.tailWidth < 8) {
-        next.props.tailWidth = 8;
+      //Make sure the tail doesn't get too small and begin inverting
+      if (next.props.tailWidth < 1) {
+        next.props.tailWidth = 1;
       }
-      if (corner1 < shape.props.w - shape.props.tailWidth / 2) {
-        next.props.tailWidth += 0;
-      }
-      if (corner2 > -shape.props.w + shape.props.tailWidth / 2) {
-        next.props.tailWidth -= 0;
+      //If the corners are getting out of bounds, move them back in
+      if (
+        corner1 > shape.props.w - shape.props.tailWidth / 2 ||
+        corner2 < -shape.props.w + shape.props.tailWidth / 2
+      ) {
+        if (handle.x > shape.props.w - shape.props.tailWidth / 2) {
+          next.props.handles[handle.id].x =
+            shape.props.w - shape.props.tailWidth / 2;
+        } else if (handle.x < -shape.props.w + shape.props.tailWidth / 2) {
+          next.props.handles[handle.id].x =
+            -shape.props.w + shape.props.tailWidth / 2;
+        }
+        //if the disdtance between the corners is greater than the width of the shape, don't grow the tail anymore
+        if (
+          Math.abs(
+            shape.props.handles.handle1.x -
+              shape.props.handles.handle2.x -
+              shape.props.tailWidth
+          ) >
+          shape.props.w * 2
+        ) {
+          next.props.tailWidth = shape.props.w * 2;
+        }
       }
     }
     //Changing position of the tail
