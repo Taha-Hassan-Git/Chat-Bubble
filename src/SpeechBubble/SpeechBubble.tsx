@@ -122,8 +122,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   override getHandles(shape: SpeechBubbleShape) {
     const handles = shape.props.handles;
-    const sortedHandles = Object.values(handles).sort(sortByIndex);
-    return sortedHandles;
+    const handlesArray = Object.values(handles);
+    return handlesArray;
   }
   previousHandle: {
     shapeId: TLShapeId;
@@ -150,46 +150,46 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       };
     }
 
+    //Does the user want to move the tail or make it wider?
     const diffX = handle.x - this.previousHandle.x;
     const diffY = handle.y - this.previousHandle.y;
 
-    //Does the user want to move the tail or make it wider?
-    // const diffX = handle.x - shape.props.handles["handle1"].x;
-    // const diffY = handle.y - shape.props.handles["handle1"].y;
     console.log({ diffX, diffY });
 
     //Check handle, and check bounds
-    if (
-      handle.id === "handle1" &&
-      handle.x < shape.props.w - shape.props.tailWidth / 2 &&
-      handle.x > -shape.props.w + shape.props.tailWidth / 2
-    ) {
+    if (handle.id === "handle1") {
       //Moving the tail
       if (Math.abs(diffX) > Math.abs(diffY)) {
         next.props.handles[handle.id] = {
           ...next.props.handles[handle.id],
           x: handle.x,
         };
+        if (handle.x > shape.props.w - shape.props.tailWidth / 2) {
+          next.props.handles[handle.id].x =
+            shape.props.w - shape.props.tailWidth / 2;
+        } else if (handle.x < -shape.props.w + shape.props.tailWidth / 2) {
+          next.props.handles[handle.id].x =
+            -shape.props.w + shape.props.tailWidth / 2;
+        }
       }
       //Making the tail wider
       //We should check bounds here too
       const corner1 = shape.props.handles.handle1.x + shape.props.tailWidth / 2;
       const corner2 = shape.props.handles.handle1.x - shape.props.tailWidth / 2;
-      if (Math.abs(diffY) > Math.abs(diffX)) {
-        if (next.props.tailWidth < 10) {
-          next.props.tailWidth = 10;
-        }
-        if (corner1 < shape.props.w - shape.props.tailWidth / 2) {
-          next.props.tailWidth += 0;
-        }
-        if (corner2 > -shape.props.w + shape.props.tailWidth / 2) {
-          next.props.tailWidth -= 0;
-        }
-        if (diffY > 0) {
-          next.props.tailWidth -= 2;
-        } else {
-          next.props.tailWidth += 2;
-        }
+
+      if (Math.abs(diffY) > Math.abs(diffX) && diffY > 0) {
+        next.props.tailWidth -= Math.abs(diffY);
+      } else if (Math.abs(diffY) > Math.abs(diffX) && diffY < 0) {
+        next.props.tailWidth += Math.abs(diffY);
+      }
+      if (next.props.tailWidth < 8) {
+        next.props.tailWidth = 8;
+      }
+      if (corner1 < shape.props.w - shape.props.tailWidth / 2) {
+        next.props.tailWidth += 0;
+      }
+      if (corner2 > -shape.props.w + shape.props.tailWidth / 2) {
+        next.props.tailWidth -= 0;
       }
     }
     //Changing position of the tail
