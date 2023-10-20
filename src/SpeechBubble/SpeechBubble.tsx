@@ -120,7 +120,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       ],
       isFilled: shape.props.isFilled,
     });
-    console.log({ w, h, tailHeight, tailWidth });
+
     return new Group2d({
       children: [
         body,
@@ -233,7 +233,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
         }
         //if the distance between the corners is greater than the width of the shape, don't grow the tail anymore
         if (Math.abs(corner1 - corner2) > shape.props.w * 2) {
-          console.log("too big");
           next.props.tailWidth = shape.props.w * 2;
         }
       }
@@ -259,6 +258,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
+    const bounds = this.getGeometry(shape).getBounds();
+    console.log(bounds);
     return (
       <>
         <svg className="tl-svg-container">
@@ -269,11 +270,28 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
             fill="none"
           />
         </svg>
-        <div className="tl-text-label">
-          <div className="tl-text-label-inner">
-            <div className="tl-text tl-text-content" dir="ltr">
-              {shape.props.text && shape.props.text}
-            </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            width: bounds.w,
+            height: bounds.h + shape.props.tailHeight,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              position: "relative",
+              top: bounds.y,
+              left: bounds.x,
+              width: "fit-content",
+              height: "fit-content",
+            }}
+            dir="ltr"
+          >
+            {shape.props.text && shape.props.text}
           </div>
         </div>
       </>
