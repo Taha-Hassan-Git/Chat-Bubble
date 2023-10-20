@@ -258,8 +258,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
-    const bounds = this.getGeometry(shape).getBounds();
-    console.log(bounds);
+    const group = this.getGeometry(shape);
+    const bounds = group.children[0].getBounds();
     return (
       <>
         <svg className="tl-svg-container">
@@ -277,7 +277,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
             alignItems: "center",
             position: "absolute",
             width: bounds.w,
-            height: bounds.h + shape.props.tailHeight,
+            height: bounds.h,
           }}
         >
           <div
