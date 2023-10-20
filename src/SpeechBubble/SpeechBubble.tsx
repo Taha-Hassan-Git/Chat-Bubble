@@ -9,6 +9,8 @@ import {
   TLOnHandleChangeHandler,
   deepCopy,
   TLShapeId,
+  Group2d,
+  Rectangle2d,
 } from "@tldraw/tldraw";
 
 // GET THE ELEMENT FOR THE HANDLES, CHANGE ITS ZINDEX TO 101
@@ -28,6 +30,7 @@ type SpeechBubbleShape = TLBaseShape<
   {
     tailHeight: number;
     tailWidth: number;
+    text: string;
     w: number;
     h: number;
     strokeWidth: number;
@@ -64,7 +67,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
-      w: 100,
+      text: "hello",
+      w: 200,
       h: 130,
       isFilled: true,
       size: "m",
@@ -104,17 +108,31 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       handles: { handle1, handle2 },
     } = shape.props;
     const offset = tailWidth / 2;
-    return new Polygon2d({
+    const body = new Polygon2d({
       points: [
         new Vec2d(handle2.x, handle2.y),
         new Vec2d(handle1.x - offset, handle1.y),
-        new Vec2d(-w, tailHeight),
-        new Vec2d(-w, -h),
-        new Vec2d(w, -h),
-        new Vec2d(w, tailHeight),
+        new Vec2d(-w / 2, tailHeight),
+        new Vec2d(-w / 2, -h),
+        new Vec2d(w / 2, -h),
+        new Vec2d(w / 2, tailHeight),
         new Vec2d(handle1.x + offset, handle1.y),
       ],
       isFilled: shape.props.isFilled,
+    });
+    console.log({ w, h, tailHeight, tailWidth });
+    return new Group2d({
+      children: [
+        body,
+        new Rectangle2d({
+          width: w,
+          height: h + tailHeight,
+          x: -w / 2,
+          y: -h,
+          isFilled: true,
+          isLabel: true,
+        }),
+      ],
     });
   }
 
@@ -242,14 +260,23 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
     return (
-      <svg className="tl-svg-container">
-        <path
-          d={d}
-          stroke={shape.props.color}
-          strokeWidth={shape.props.strokeWidth}
-          fill="none"
-        />
-      </svg>
+      <>
+        <svg className="tl-svg-container">
+          <path
+            d={d}
+            stroke={shape.props.color}
+            strokeWidth={shape.props.strokeWidth}
+            fill="none"
+          />
+        </svg>
+        <div className="tl-text-label">
+          <div className="tl-text-label-inner">
+            <div className="tl-text tl-text-content" dir="ltr">
+              {shape.props.text && shape.props.text}
+            </div>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -273,10 +300,10 @@ export function getSpeechBubblePath(shape: SpeechBubbleShape) {
   const d = `
             M${handle2.x},${handle2.y}
             L${handle1.x - offset},${handle1.y}
-            L-${w},${tailHeight}
-            L-${w},-${h}
-            L${w},-${h}
-            L${w},${tailHeight}
+            L-${w / 2},${tailHeight}
+            L-${w / 2},-${h}
+            L${w / 2},-${h}
+            L${w / 2},${tailHeight}
             L${handle1.x + offset},${handle1.y}
             z`;
 
