@@ -158,7 +158,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     //Does the user want to move the tail or make it wider?
     let diffX = handle.x - this.previousHandle.x;
     let diffY = handle.y - this.previousHandle.y;
-    console.log({ diffX, diffY });
+
     //Check handle, and check bounds
     if (handle.id === "handle1") {
       //speed limit on the diff, this is to fix a bug when the user would
@@ -213,15 +213,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           next.props.handles[handle.id].x =
             -shape.props.w + shape.props.tailWidth / 2;
         }
-        //if the disdtance between the corners is greater than the width of the shape, don't grow the tail anymore
-        if (
-          Math.abs(
-            shape.props.handles.handle1.x -
-              shape.props.handles.handle2.x -
-              shape.props.tailWidth
-          ) >
-          shape.props.w * 2
-        ) {
+        //if the distance between the corners is greater than the width of the shape, don't grow the tail anymore
+        if (Math.abs(corner1 - corner2) > shape.props.w * 2) {
+          console.log("too big");
           next.props.tailWidth = shape.props.w * 2;
         }
       }
