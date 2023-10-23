@@ -224,19 +224,22 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       }
       //If the corners are getting out of bounds, move them back in
       if (
-        corner1 > shape.props.w - shape.props.tailWidth / 2 ||
-        corner2 < -shape.props.w + shape.props.tailWidth / 2
+        corner1 > shape.props.w / 2 - shape.props.tailWidth / 2 ||
+        corner2 < -(shape.props.w / 2) + shape.props.tailWidth / 2
       ) {
-        if (handle.x > shape.props.w - shape.props.tailWidth / 2) {
+        if (handle.x > shape.props.w / 2 - shape.props.tailWidth / 2) {
           next.props.handles[handle.id].x =
-            shape.props.w - shape.props.tailWidth / 2;
-        } else if (handle.x < -shape.props.w + shape.props.tailWidth / 2) {
+            shape.props.w / 2 - shape.props.tailWidth / 2;
+        } else if (
+          handle.x <
+          -(shape.props.w / 2) + shape.props.tailWidth / 2
+        ) {
           next.props.handles[handle.id].x =
-            -shape.props.w + shape.props.tailWidth / 2;
+            -(shape.props.w / 2) + shape.props.tailWidth / 2;
         }
         //if the distance between the corners is greater than the width of the shape, don't grow the tail anymore
-        if (Math.abs(corner1 - corner2) > shape.props.w * 2) {
-          next.props.tailWidth = shape.props.w * 2;
+        if (Math.abs(corner1 - corner2) > shape.props.w) {
+          next.props.tailWidth = shape.props.w;
         }
       }
     }
