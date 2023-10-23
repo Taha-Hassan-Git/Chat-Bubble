@@ -196,12 +196,16 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           ...next.props.handles[handle.id],
           x: handle.x,
         };
-        if (handle.x > shape.props.w - shape.props.tailWidth / 2) {
+        if (handle.x > shape.props.w / 2 - shape.props.tailWidth / 2) {
+          console.log("out of bounds");
           next.props.handles[handle.id].x =
-            shape.props.w - shape.props.tailWidth / 2;
-        } else if (handle.x < -shape.props.w + shape.props.tailWidth / 2) {
+            shape.props.w / 2 - shape.props.tailWidth / 2;
+        } else if (
+          handle.x <
+          -(shape.props.w / 2) + shape.props.tailWidth / 2
+        ) {
           next.props.handles[handle.id].x =
-            -shape.props.w + shape.props.tailWidth / 2;
+            -(shape.props.w / 2) + shape.props.tailWidth / 2;
         }
       }
       //Making the tail wider
@@ -260,6 +264,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const d = getSpeechBubblePath(shape);
     const group = this.getGeometry(shape);
     const bounds = group.children[0].getBounds();
+
     return (
       <>
         <svg className="tl-svg-container">
