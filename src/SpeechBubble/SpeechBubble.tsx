@@ -197,7 +197,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           x: handle.x,
         };
         if (handle.x > shape.props.w / 2 - shape.props.tailWidth / 2) {
-          console.log("out of bounds");
           next.props.handles[handle.id].x =
             shape.props.w / 2 - shape.props.tailWidth / 2;
         } else if (
@@ -263,7 +262,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
     const group = this.getGeometry(shape);
-    const bounds = group.children[0].getBounds();
+    const bounds = group.children[1].getBounds();
 
     return (
       <>
