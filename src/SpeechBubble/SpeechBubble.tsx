@@ -63,8 +63,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getDefaultProps(): SpeechBubbleShape["props"] {
-    const tailHeight = -80;
-    const tailWidth = 150;
+    const tailHeight = -20;
+    const tailWidth = 60;
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
@@ -82,7 +82,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canBind: false,
           canSnap: true,
           index: "a1",
-          x: 60 - tailWidth / 2,
+          x: 30 - tailWidth / 2,
           y: tailHeight,
         },
         handle2: {
@@ -92,7 +92,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canBind: false,
           canSnap: true,
           //start position
-          x: 0,
+          x: -60,
           //there was an extra bit at the bottom I needed to trim off
           y: -tailHeight,
         },
@@ -156,16 +156,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const newHandle2: HandleType = { ...handle2 };
     const newTail = { tailHeight, tailWidth };
 
-    const corner1 = handle1.x + tailWidth / 2;
-    const corner2 = handle1.x - tailWidth / 2;
-
     // If the tail gets too high, move it back down
     if (handle2.y < tailHeight) {
       newHandle2.y = tailHeight;
-    }
-    // if the tail is wider than the shape, make it the same width
-    if (Math.abs(corner1 - corner2) > w) {
-      newTail.tailWidth = w;
     }
     // if the tail gets too small, don't let it invert
     if (tailWidth < 1) {
@@ -173,12 +166,14 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     }
     //if the corners are out of bounds, move them back in
     if (handle1.x > w / 2 - tailWidth / 2) {
-      console.log("corner1");
       newHandle1.x = w / 2 - tailWidth / 2;
     }
     if (handle1.x < -(w / 2) + tailWidth / 2) {
-      console.log("corner2");
       newHandle1.x = -(w / 2) + tailWidth / 2;
+    }
+    // if the tail is wider than the shape, make it the same width
+    if (tailWidth > w) {
+      newTail.tailWidth = w;
     }
 
     return {
