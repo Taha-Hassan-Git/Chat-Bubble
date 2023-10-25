@@ -8,9 +8,10 @@ import {
   Polygon2d,
   TLOnHandleChangeHandler,
   deepCopy,
-  TLShapeId,
   Group2d,
   Rectangle2d,
+  TLOnBeforeUpdateHandler,
+  T,
 } from "@tldraw/tldraw";
 
 // GET THE ELEMENT FOR THE HANDLES, CHANGE ITS ZINDEX TO 101
@@ -62,8 +63,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override canBind = (_shape: SpeechBubbleShape) => true;
 
   getDefaultProps(): SpeechBubbleShape["props"] {
-    const tailHeight = -20;
-    const tailWidth = 20;
+    const tailHeight = -80;
+    const tailWidth = 150;
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
@@ -141,110 +142,75 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const handlesArray = Object.values(handles);
     return handlesArray;
   }
+  override onBeforeUpdate?:
+    | TLOnBeforeUpdateHandler<SpeechBubbleShape>
+    | undefined = (_: T, next: T) => {
+    const {
+      w,
+      tailHeight,
+      tailWidth,
+      handles: { handle1, handle2 },
+    } = next.props;
 
-  // We use this property to keep track of the previous handle position
-  // it's sneaky, but it works!
-  previousHandle: {
-    shapeId: TLShapeId;
-    handleId: string;
-    x: number;
-    y: number;
-  } | null = null;
+    const newHandle1: HandleType = { ...handle1 };
+    const newHandle2: HandleType = { ...handle2 };
+    const newTail = { tailHeight, tailWidth };
+
+    const corner1 = handle1.x + tailWidth / 2;
+    const corner2 = handle1.x - tailWidth / 2;
+
+    // If the tail gets too high, move it back down
+    if (handle2.y < tailHeight) {
+      newHandle2.y = tailHeight;
+    }
+    // if the tail is wider than the shape, make it the same width
+    if (Math.abs(corner1 - corner2) > w) {
+      newTail.tailWidth = w;
+    }
+    // if the tail gets too small, don't let it invert
+    if (tailWidth < 1) {
+      newTail.tailWidth = 1;
+    }
+    //if the corners are out of bounds, move them back in
+    if (handle1.x > w / 2 - tailWidth / 2) {
+      console.log("corner1");
+      newHandle1.x = w / 2 - tailWidth / 2;
+    }
+    if (handle1.x < -(w / 2) + tailWidth / 2) {
+      console.log("corner2");
+      newHandle1.x = -(w / 2) + tailWidth / 2;
+    }
+
+    return {
+      ...next,
+      props: {
+        ...next.props,
+        tailHeight: newTail.tailHeight,
+        tailWidth: newTail.tailWidth,
+        handles: { handle1: newHandle1, handle2: newHandle2 },
+      },
+    };
+  };
+
   override onHandleChange: TLOnHandleChangeHandler<SpeechBubbleShape> = (
     shape,
     { handle }
   ) => {
     const next = deepCopy(shape);
 
-    if (
-      // if there's no previous handle, set it to the current handle pos
-      !this.previousHandle ||
-      //if the previous handle is different than the current handle, we don't want
-      // to calculate the diff, so we reset
-      this.previousHandle.shapeId !== shape.id ||
-      //if we grab a different handle, we don't want to calculate the diff, so we reset
-      this.previousHandle.handleId !== handle.id
-    ) {
-      this.previousHandle = {
-        shapeId: shape.id,
-        handleId: handle.id,
-        x: shape.props.handles[handle.id as HandleType["id"]].x,
-        y: shape.props.handles[handle.id as HandleType["id"]].y,
-      };
-    }
+    // 1. stash the original shape (original handle position)
+    // 2. calculate the delta from where you started dragging to now (point origin-> current point)
+    // 3. add that to the original handle position
 
-    //Does the user want to move the tail or make it wider?
-    let diffX = handle.x - this.previousHandle.x;
-    let diffY = handle.y - this.previousHandle.y;
+    const deltaY = 0.1;
 
     //Check handle, and check bounds
     if (handle.id === "handle1") {
-      //speed limit on the diff, this is to fix a bug when the user would
-      //grab the same handle again and the diff would be huge
-      if (
-        Math.abs(handle.x - this.previousHandle.x) > 20 ||
-        Math.abs(handle.y - this.previousHandle.y) > 20
-      ) {
-        diffX = 20;
-        diffY = 20;
-      }
+      next.props.handles.handle1.x = handle.x;
 
-      //Moving the tail
-
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        next.props.handles[handle.id] = {
-          ...next.props.handles[handle.id],
-          x: handle.x,
-        };
-        if (handle.x > shape.props.w / 2 - shape.props.tailWidth / 2) {
-          next.props.handles[handle.id].x =
-            shape.props.w / 2 - shape.props.tailWidth / 2;
-        } else if (
-          handle.x <
-          -(shape.props.w / 2) + shape.props.tailWidth / 2
-        ) {
-          next.props.handles[handle.id].x =
-            -(shape.props.w / 2) + shape.props.tailWidth / 2;
-        }
-      }
-      //Making the tail wider
-      //We need to check the corners of the tail to make sure it doesn't go past the corners of the box
-      const corner1 = shape.props.handles.handle1.x + shape.props.tailWidth / 2;
-      const corner2 = shape.props.handles.handle1.x - shape.props.tailWidth / 2;
-
-      //Check if we're moving up or down to increase/decrease the tail width
-      if (Math.abs(diffY) > Math.abs(diffX) && diffY > 0) {
-        next.props.tailWidth -= Math.abs(diffY);
-      } else if (Math.abs(diffY) > Math.abs(diffX) && diffY < 0) {
-        next.props.tailWidth += Math.abs(diffY);
-      }
-      //Make sure the tail doesn't get too small and begin inverting
-      if (next.props.tailWidth < 1) {
-        next.props.tailWidth = 1;
-      }
-      //If the corners are getting out of bounds, move them back in
-      if (
-        corner1 > shape.props.w / 2 - shape.props.tailWidth / 2 ||
-        corner2 < -(shape.props.w / 2) + shape.props.tailWidth / 2
-      ) {
-        if (handle.x > shape.props.w / 2 - shape.props.tailWidth / 2) {
-          next.props.handles[handle.id].x =
-            shape.props.w / 2 - shape.props.tailWidth / 2;
-        } else if (
-          handle.x <
-          -(shape.props.w / 2) + shape.props.tailWidth / 2
-        ) {
-          next.props.handles[handle.id].x =
-            -(shape.props.w / 2) + shape.props.tailWidth / 2;
-        }
-        //if the distance between the corners is greater than the width of the shape, don't grow the tail anymore
-        if (Math.abs(corner1 - corner2) > shape.props.w) {
-          next.props.tailWidth = shape.props.w;
-        }
-      }
+      next.props.tailWidth += deltaY;
     }
-    //Changing position of the tail
-    else if (handle.id === "handle2") {
+    if (handle.id === "handle2") {
       next.props.handles["handle2"] = {
         ...next.props.handles["handle2"],
         x: handle.x,
@@ -252,20 +218,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       };
     }
 
-    this.previousHandle = {
-      shapeId: shape.id,
-      handleId: handle.id,
-      x: handle.x,
-      y: handle.y,
-    };
-
     return next;
   };
 
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
-    const group = this.getGeometry(shape);
-    const bounds = group.children[1].getBounds();
 
     return (
       <>
@@ -277,30 +234,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
             fill="none"
           />
         </svg>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            position: "absolute",
-            width: bounds.w,
-            height: bounds.h,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              position: "relative",
-              top: bounds.y,
-              left: bounds.x,
-              width: "fit-content",
-              height: "fit-content",
-            }}
-            dir="ltr"
-          >
-            {shape.props.text && shape.props.text}
-          </div>
-        </div>
       </>
     );
   }
@@ -308,11 +241,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   indicator(shape: SpeechBubbleShape) {
     return <path d={getSpeechBubblePath(shape)} />;
   }
+
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
     return resizeBox(shape, info);
   };
 }
-
 export function getSpeechBubblePath(shape: SpeechBubbleShape) {
   const {
     w,
