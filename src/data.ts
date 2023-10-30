@@ -21,7 +21,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:oFcgQ_FKbasU3xdzv6kbg",
       type: "speech-bubble",
       props: {
         tailHeight: -20,
@@ -56,6 +55,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a1",
+      id: "shape:oFcgQ_FKbasU3xdzv6kbg",
       typeName: "shape",
     },
     "shape:U5bWzc3ZAwUrSE2i-ap3H": {
@@ -65,7 +65,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:U5bWzc3ZAwUrSE2i-ap3H",
       type: "speech-bubble",
       props: {
         tailHeight: -20,
@@ -100,6 +99,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a2",
+      id: "shape:U5bWzc3ZAwUrSE2i-ap3H",
       typeName: "shape",
     },
     "shape:Mkl4SwMU0IpxH0ZdwG_Uy": {
@@ -109,7 +109,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:Mkl4SwMU0IpxH0ZdwG_Uy",
       type: "speech-bubble",
       props: {
         tailHeight: -20,
@@ -144,6 +143,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a3",
+      id: "shape:Mkl4SwMU0IpxH0ZdwG_Uy",
       typeName: "shape",
     },
     "shape:J5NFro4LodTp1Ewp9RD1w": {
@@ -153,7 +153,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:J5NFro4LodTp1Ewp9RD1w",
       type: "geo",
       props: {
         w: 98.8125,
@@ -173,6 +172,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a4",
+      id: "shape:J5NFro4LodTp1Ewp9RD1w",
       typeName: "shape",
     },
     "shape:uotHsIAV4MSgnZmNvGcpX": {
@@ -182,7 +182,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:uotHsIAV4MSgnZmNvGcpX",
       type: "draw",
       props: {
         segments: [
@@ -207,6 +206,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a5",
+      id: "shape:uotHsIAV4MSgnZmNvGcpX",
       typeName: "shape",
     },
     "shape:LmTGpH9bNfIWF2h2mKIUK": {
@@ -216,7 +216,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:LmTGpH9bNfIWF2h2mKIUK",
       type: "draw",
       props: {
         segments: [
@@ -241,6 +240,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a6",
+      id: "shape:LmTGpH9bNfIWF2h2mKIUK",
       typeName: "shape",
     },
     "shape:p3Ckeluz51DZ-MLXKGqss": {
@@ -250,7 +250,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:p3Ckeluz51DZ-MLXKGqss",
       type: "draw",
       props: {
         segments: [
@@ -985,6 +984,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a7",
+      id: "shape:p3Ckeluz51DZ-MLXKGqss",
       typeName: "shape",
     },
     "shape:nPU3dkyLuaS2ldAL8t_hD": {
@@ -994,7 +994,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:nPU3dkyLuaS2ldAL8t_hD",
       type: "draw",
       props: {
         segments: [
@@ -1239,6 +1238,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a8",
+      id: "shape:nPU3dkyLuaS2ldAL8t_hD",
       typeName: "shape",
     },
     "shape:b8fQRrfarnSee5DdQ-WE3": {
@@ -1248,7 +1248,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:b8fQRrfarnSee5DdQ-WE3",
       type: "draw",
       props: {
         segments: [
@@ -1443,6 +1442,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a9",
+      id: "shape:b8fQRrfarnSee5DdQ-WE3",
       typeName: "shape",
     },
     "shape:hMm5YOXV5mpmxRo_ETomb": {
@@ -1452,7 +1452,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:hMm5YOXV5mpmxRo_ETomb",
       type: "draw",
       props: {
         segments: [
@@ -1697,6 +1696,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aA",
+      id: "shape:hMm5YOXV5mpmxRo_ETomb",
       typeName: "shape",
     },
     "shape:8bNqEG9E7aZXw10r-Yqf5": {
@@ -1706,7 +1706,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:8bNqEG9E7aZXw10r-Yqf5",
       type: "draw",
       props: {
         segments: [
@@ -1896,6 +1895,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aB",
+      id: "shape:8bNqEG9E7aZXw10r-Yqf5",
       typeName: "shape",
     },
     "shape:rt1CILZvDF3qwTIbwx5O3": {
@@ -1905,7 +1905,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:rt1CILZvDF3qwTIbwx5O3",
       type: "draw",
       props: {
         segments: [
@@ -2155,6 +2154,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aC",
+      id: "shape:rt1CILZvDF3qwTIbwx5O3",
       typeName: "shape",
     },
     "shape:K3YrYtsMxFdcQFqLX4F5q": {
@@ -2164,7 +2164,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:K3YrYtsMxFdcQFqLX4F5q",
       type: "geo",
       props: {
         w: 98.8125,
@@ -2184,6 +2183,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a4V",
+      id: "shape:K3YrYtsMxFdcQFqLX4F5q",
       typeName: "shape",
     },
     "shape:OHYHPlH2Whx6gX6Xtm_9Z": {
@@ -2193,7 +2193,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:OHYHPlH2Whx6gX6Xtm_9Z",
       type: "draw",
       props: {
         segments: [
@@ -2218,6 +2217,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a5V",
+      id: "shape:OHYHPlH2Whx6gX6Xtm_9Z",
       typeName: "shape",
     },
     "shape:dN_Q2X1q04x3L6GYUY38f": {
@@ -2227,7 +2227,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:dN_Q2X1q04x3L6GYUY38f",
       type: "draw",
       props: {
         segments: [
@@ -2252,6 +2251,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a6V",
+      id: "shape:dN_Q2X1q04x3L6GYUY38f",
       typeName: "shape",
     },
     "shape:lrPGA21yUZ54OfIrps_Iq": {
@@ -2261,7 +2261,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:lrPGA21yUZ54OfIrps_Iq",
       type: "draw",
       props: {
         segments: [
@@ -2996,6 +2995,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a7V",
+      id: "shape:lrPGA21yUZ54OfIrps_Iq",
       typeName: "shape",
     },
     "shape:Ym3zUwETQ7zqYw3cjqs7S": {
@@ -3005,7 +3005,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:Ym3zUwETQ7zqYw3cjqs7S",
       type: "draw",
       props: {
         segments: [
@@ -3200,6 +3199,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a9V",
+      id: "shape:Ym3zUwETQ7zqYw3cjqs7S",
       typeName: "shape",
     },
     "shape:fWPlh6lrubrY4kbVFbKUi": {
@@ -3209,7 +3209,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:fWPlh6lrubrY4kbVFbKUi",
       type: "draw",
       props: {
         segments: [
@@ -3454,6 +3453,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aAV",
+      id: "shape:fWPlh6lrubrY4kbVFbKUi",
       typeName: "shape",
     },
     "shape:fCgbqXD39mvz95bmBdlTF": {
@@ -3463,7 +3463,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:fCgbqXD39mvz95bmBdlTF",
       type: "draw",
       props: {
         segments: [
@@ -3653,6 +3652,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aBV",
+      id: "shape:fCgbqXD39mvz95bmBdlTF",
       typeName: "shape",
     },
     "shape:yPC-aShSSICCzN44_ndoM": {
@@ -3662,7 +3662,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:yPC-aShSSICCzN44_ndoM",
       type: "draw",
       props: {
         segments: [
@@ -3912,6 +3911,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aD",
+      id: "shape:yPC-aShSSICCzN44_ndoM",
       typeName: "shape",
     },
     "shape:Q69zrA6UQ5-qVx83Nc4Tm": {
@@ -3921,7 +3921,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:Q69zrA6UQ5-qVx83Nc4Tm",
       type: "draw",
       props: {
         segments: [
@@ -4596,6 +4595,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aE",
+      id: "shape:Q69zrA6UQ5-qVx83Nc4Tm",
       typeName: "shape",
     },
     "shape:5TkhdW4gqER_tslHT39dE": {
@@ -4605,7 +4605,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:5TkhdW4gqER_tslHT39dE",
       type: "geo",
       props: {
         w: 98.8125,
@@ -4625,6 +4624,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a4l",
+      id: "shape:5TkhdW4gqER_tslHT39dE",
       typeName: "shape",
     },
     "shape:4a5zbMAjB07C4iqkXkB6E": {
@@ -4634,7 +4634,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:4a5zbMAjB07C4iqkXkB6E",
       type: "draw",
       props: {
         segments: [
@@ -4659,6 +4658,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a5l",
+      id: "shape:4a5zbMAjB07C4iqkXkB6E",
       typeName: "shape",
     },
     "shape:Vh9xUhtaXcgXiUYJfRIHg": {
@@ -4668,7 +4668,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:Vh9xUhtaXcgXiUYJfRIHg",
       type: "draw",
       props: {
         segments: [
@@ -4693,6 +4692,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a6l",
+      id: "shape:Vh9xUhtaXcgXiUYJfRIHg",
       typeName: "shape",
     },
     "shape:rjI2YnCuLW6lIy5iO9grD": {
@@ -4702,7 +4702,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:rjI2YnCuLW6lIy5iO9grD",
       type: "draw",
       props: {
         segments: [
@@ -5437,6 +5436,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "a7l",
+      id: "shape:rjI2YnCuLW6lIy5iO9grD",
       typeName: "shape",
     },
     "shape:5LLHXD1nNdHoMH1JQfbDQ": {
@@ -5446,7 +5446,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:5LLHXD1nNdHoMH1JQfbDQ",
       type: "draw",
       props: {
         segments: [
@@ -5736,6 +5735,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aF",
+      id: "shape:5LLHXD1nNdHoMH1JQfbDQ",
       typeName: "shape",
     },
     "shape:rxB9j89TrUoND6dvENQ4Q": {
@@ -5745,7 +5745,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:rxB9j89TrUoND6dvENQ4Q",
       type: "draw",
       props: {
         segments: [
@@ -5930,6 +5929,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aG",
+      id: "shape:rxB9j89TrUoND6dvENQ4Q",
       typeName: "shape",
     },
     "shape:Rc3qfYLziR5uEnQOZUVf3": {
@@ -5939,7 +5939,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:Rc3qfYLziR5uEnQOZUVf3",
       type: "draw",
       props: {
         segments: [
@@ -6114,6 +6113,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aH",
+      id: "shape:Rc3qfYLziR5uEnQOZUVf3",
       typeName: "shape",
     },
     "shape:c0CmAANG2vzI5w0XqsQ1P": {
@@ -6123,7 +6123,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:c0CmAANG2vzI5w0XqsQ1P",
       type: "draw",
       props: {
         segments: [
@@ -6583,6 +6582,7 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aI",
+      id: "shape:c0CmAANG2vzI5w0XqsQ1P",
       typeName: "shape",
     },
     "shape:38P_1wtQU1V7LXyt5DDwg": {
@@ -6592,7 +6592,6 @@ export const snapshot = {
       isLocked: false,
       opacity: 1,
       meta: {},
-      id: "shape:38P_1wtQU1V7LXyt5DDwg",
       type: "draw",
       props: {
         segments: [
@@ -7032,6 +7031,76 @@ export const snapshot = {
       },
       parentId: "page:page",
       index: "aJ",
+      id: "shape:38P_1wtQU1V7LXyt5DDwg",
+      typeName: "shape",
+    },
+    "shape:Ey8Uo41m9S821tcOivC9N": {
+      x: 194.28125,
+      y: 341.53593277588817,
+      rotation: 0,
+      isLocked: false,
+      opacity: 1,
+      meta: {},
+      id: "shape:Ey8Uo41m9S821tcOivC9N",
+      type: "text",
+      props: {
+        color: "light-violet",
+        size: "m",
+        w: 179.15625,
+        text: "We're chatting",
+        font: "draw",
+        align: "middle",
+        autoSize: true,
+        scale: 0.9234548520262805,
+      },
+      parentId: "page:page",
+      index: "aK",
+      typeName: "shape",
+    },
+    "shape:aM3uAgp5pUvts34H-tL8r": {
+      x: 613.7066762602475,
+      y: 214.01509944255486,
+      rotation: 0,
+      isLocked: false,
+      opacity: 1,
+      meta: {},
+      id: "shape:aM3uAgp5pUvts34H-tL8r",
+      type: "text",
+      props: {
+        color: "light-green",
+        size: "m",
+        w: 130.46685581283793,
+        text: "Wasssuuup!",
+        font: "draw",
+        align: "middle",
+        autoSize: true,
+        scale: 0.9234548520262805,
+      },
+      parentId: "page:page",
+      index: "aL",
+      typeName: "shape",
+    },
+    "shape:-thO9FpJWjzQ1MijY6cNm": {
+      x: 819.3529703080485,
+      y: 404.2963494425549,
+      rotation: 0,
+      isLocked: false,
+      opacity: 1,
+      meta: {},
+      id: "shape:-thO9FpJWjzQ1MijY6cNm",
+      type: "text",
+      props: {
+        color: "yellow",
+        size: "m",
+        w: 150.2850626762457,
+        text: "I love u guyz",
+        font: "draw",
+        align: "middle",
+        autoSize: true,
+        scale: 0.9234548520262805,
+      },
+      parentId: "page:page",
+      index: "aM",
       typeName: "shape",
     },
   },
