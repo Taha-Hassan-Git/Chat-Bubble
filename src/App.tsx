@@ -2,6 +2,7 @@ import "./App.css";
 import { Tldraw } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
 import { SpeechBubbleUtil } from "./SpeechBubble/SpeechBubble";
+import { snapshot } from "./data";
 
 function App() {
   return (
@@ -9,14 +10,8 @@ function App() {
       <Tldraw
         shapeUtils={[SpeechBubbleUtil]}
         onMount={(editor) => {
-          editor.createShapes([
-            {
-              type: "speech-bubble",
-              x: 300,
-              y: 300,
-              props: { color: "black", strokeWidth: 1 },
-            },
-          ]);
+          editor.store.loadSnapshot(snapshot);
+          editor.setCamera({ x: -100, y: 150, z: 0.75 });
         }}
       />
     </div>

@@ -14,8 +14,6 @@ import {
   T,
 } from "@tldraw/tldraw";
 
-// GET THE ELEMENT FOR THE HANDLES, CHANGE ITS ZINDEX TO 101
-
 type HandleType = {
   id: "handle1" | "handle2";
   type: "vertex";
@@ -74,7 +72,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 5,
+      strokeWidth: 100,
       handles: {
         handle1: {
           id: "handle1",
@@ -91,9 +89,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           index: "a2",
           canBind: false,
           canSnap: true,
-          //start position
           x: -60,
-          //there was an extra bit at the bottom I needed to trim off
           y: -tailHeight,
         },
       },
@@ -171,8 +167,17 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     if (handle1.x < -(w / 2) + tailWidth / 2) {
       newHandle1.x = -(w / 2) + tailWidth / 2;
     }
+    // when the tail was at its smallest, you could drag it out of bounds
+    // this prevents that
+    if (tailWidth <= 1 && handle1.x > w / 2) {
+      newHandle1.x = w / 2;
+    }
+    if (tailWidth <= 1 && handle1.x < -w / 2) {
+      newHandle1.x = -w / 2;
+    }
     // if the tail is wider than the shape, make it the same width
     if (tailWidth > w) {
+      newHandle1.x = 0;
       newTail.tailWidth = w;
     }
 
@@ -188,22 +193,20 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   };
 
   override onHandleChange: TLOnHandleChangeHandler<SpeechBubbleShape> = (
-    shape,
-    { handle }
+    _,
+    { handle, initial }
   ) => {
-    const next = deepCopy(shape);
+    const next = deepCopy(initial!);
 
-    // 1. stash the original shape (original handle position)
-    // 2. calculate the delta from where you started dragging to now (point origin-> current point)
-    // 3. add that to the original handle position
+    let deltaY;
 
-    const deltaY = 0.1;
+    if (handle.id === "handle1" && initial) {
+      const oldY = initial.props.handles.handle1.y;
+      const newY = handle.y;
+      deltaY = newY - oldY;
 
-    //Check handle, and check bounds
-    if (handle.id === "handle1") {
       next.props.handles.handle1.x = handle.x;
-
-      next.props.tailWidth += deltaY;
+      next.props.tailWidth = next.props.tailWidth + deltaY;
     }
     if (handle.id === "handle2") {
       next.props.handles["handle2"] = {
@@ -218,16 +221,10 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   component(shape: SpeechBubbleShape) {
     const d = getSpeechBubblePath(shape);
-
     return (
       <>
         <svg className="tl-svg-container">
-          <path
-            d={d}
-            stroke={shape.props.color}
-            strokeWidth={shape.props.strokeWidth}
-            fill="none"
-          />
+          <path d={d} stroke={shape.props.color} strokeWidth={7} fill="none" />
         </svg>
       </>
     );
@@ -250,6 +247,7 @@ export function getSpeechBubblePath(shape: SpeechBubbleShape) {
     handles: { handle1, handle2 },
   } = shape.props;
   const offset = tailWidth / 2;
+
   const d = `
             M${handle2.x},${handle2.y}
             L${handle1.x - offset},${handle1.y}
