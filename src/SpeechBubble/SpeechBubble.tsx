@@ -11,7 +11,6 @@ import {
   Group2d,
   Rectangle2d,
   TLOnBeforeUpdateHandler,
-  T,
 } from "@tldraw/tldraw";
 
 type HandleType = {
@@ -140,7 +139,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   }
   override onBeforeUpdate?:
     | TLOnBeforeUpdateHandler<SpeechBubbleShape>
-    | undefined = (_: T, next: T) => {
+    | undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
     const {
       w,
       tailHeight,

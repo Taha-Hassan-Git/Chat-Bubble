@@ -15,7 +15,7 @@ function App() {
         overrides={uiOverrides}
         onMount={(editor) => {
           editor.store.loadSnapshot(snapshot);
-          editor.setCamera({ x: -100, y: 150, z: 0.75 });
+          editor.setCamera({ x: 0, y: 0, z: 1 });
         }}
       />
     </div>
