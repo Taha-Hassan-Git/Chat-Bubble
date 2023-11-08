@@ -1,0 +1,4 @@
+- css fonts not loading?
+- resizing
+- little tail handle good!
+- top tail handle? ok
