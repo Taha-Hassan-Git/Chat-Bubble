@@ -28,10 +28,8 @@ type SpeechBubbleShape = TLBaseShape<
   {
     tailHeight: number;
     tailWidth: number;
-    text: string;
     w: number;
     h: number;
-    strokeWidth: number;
     isFilled: boolean;
     handles: {
       handle1: HandleType;
@@ -65,13 +63,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
-      text: "hello",
       w: 200,
       h: 130,
       isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 100,
       handles: {
         handle1: {
           id: "handle1",
@@ -79,8 +75,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canBind: false,
           canSnap: true,
           index: "a1",
-          x: 30 - tailWidth / 2,
-          y: tailHeight,
+          // the middle of the shape
+          x: 100 + tailWidth / 2,
+          y: 130 + tailHeight,
         },
         handle2: {
           id: "handle2",
@@ -88,8 +85,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           index: "a2",
           canBind: false,
           canSnap: true,
-          x: -60,
-          y: -tailHeight,
+          //half the width, but let's give it a funky angle
+          x: 100 - 60,
+          y: 130 - tailHeight,
         },
       },
     };
@@ -108,10 +106,10 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       points: [
         new Vec2d(handle2.x, handle2.y),
         new Vec2d(handle1.x - offset, handle1.y),
-        new Vec2d(-w / 2, tailHeight),
-        new Vec2d(-w / 2, -h),
-        new Vec2d(w / 2, -h),
-        new Vec2d(w / 2, tailHeight),
+        new Vec2d(0, h + tailHeight),
+        new Vec2d(0, 0),
+        new Vec2d(w, 0),
+        new Vec2d(w, h + tailHeight),
         new Vec2d(handle1.x + offset, handle1.y),
       ],
       isFilled: shape.props.isFilled,
@@ -123,8 +121,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
         new Rectangle2d({
           width: w,
           height: h + tailHeight,
-          x: -w / 2,
-          y: -h,
+          x: 0,
+          y: 0,
           isFilled: true,
           isLabel: true,
         }),
@@ -142,6 +140,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     | undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
     const {
       w,
+      h,
       tailHeight,
       tailWidth,
       handles: { handle1, handle2 },
@@ -152,31 +151,31 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const newTail = { tailHeight, tailWidth };
 
     // If the tail gets too high, move it back down
-    if (handle2.y < tailHeight) {
-      newHandle2.y = tailHeight;
+    if (handle2.y < h + tailHeight) {
+      newHandle2.y = h + tailHeight;
     }
     // if the tail gets too small, don't let it invert
     if (tailWidth < 1) {
       newTail.tailWidth = 1;
     }
     //if the corners are out of bounds, move them back in
-    if (handle1.x > w / 2 - tailWidth / 2) {
-      newHandle1.x = w / 2 - tailWidth / 2;
+    if (handle1.x > w - tailWidth / 2) {
+      newHandle1.x = w - tailWidth / 2;
     }
-    if (handle1.x < -(w / 2) + tailWidth / 2) {
-      newHandle1.x = -(w / 2) + tailWidth / 2;
+    if (handle1.x < 0 + tailWidth / 2) {
+      newHandle1.x = 0 + tailWidth / 2;
     }
     // when the tail was at its smallest, you could drag it out of bounds
     // this prevents that
-    if (tailWidth <= 1 && handle1.x > w / 2) {
-      newHandle1.x = w / 2;
+    if (tailWidth <= 1 && handle1.x > w) {
+      newHandle1.x = w;
     }
-    if (tailWidth <= 1 && handle1.x < -w / 2) {
-      newHandle1.x = -w / 2;
+    if (tailWidth <= 1 && handle1.x < 0) {
+      newHandle1.x = 0;
     }
     // if the tail is wider than the shape, make it the same width
     if (tailWidth > w) {
-      newHandle1.x = 0;
+      newHandle1.x = w / 2;
       newTail.tailWidth = w;
     }
 
@@ -250,10 +249,10 @@ export function getSpeechBubblePath(shape: SpeechBubbleShape) {
   const d = `
             M${handle2.x},${handle2.y}
             L${handle1.x - offset},${handle1.y}
-            L-${w / 2},${tailHeight}
-            L-${w / 2},-${h}
-            L${w / 2},-${h}
-            L${w / 2},${tailHeight}
+            L-${0},${h + tailHeight}
+            L${0},${0}
+            L${w},${0}
+            L${w},${h + tailHeight}
             L${handle1.x + offset},${handle1.y}
             z`;
 
