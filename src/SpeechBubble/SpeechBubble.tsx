@@ -28,10 +28,8 @@ type SpeechBubbleShape = TLBaseShape<
   {
     tailHeight: number;
     tailWidth: number;
-    text: string;
     w: number;
     h: number;
-    strokeWidth: number;
     isFilled: boolean;
     handles: {
       handle1: HandleType;
@@ -65,13 +63,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return {
       tailHeight: tailHeight,
       tailWidth: tailWidth,
-      text: "hello",
       w: 200,
       h: 130,
       isFilled: true,
       size: "m",
       color: "black",
-      strokeWidth: 100,
       handles: {
         handle1: {
           id: "handle1",
@@ -79,6 +75,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           canBind: false,
           canSnap: true,
           index: "a1",
+          // the middle of the shape
           x: 100 + tailWidth / 2,
           y: 130 + tailHeight,
         },
