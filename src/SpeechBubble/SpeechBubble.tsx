@@ -8,11 +8,10 @@ import {
   Polygon2d,
   TLOnHandleChangeHandler,
   deepCopy,
-  Group2d,
-  Rectangle2d,
   structuredClone,
   TLHandle,
   intersectLineSegmentPolygon,
+  TLOnBeforeUpdateHandler,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -60,42 +59,25 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       h,
       handles: { handle },
     } = shape.props;
-    const offset = 10;
-    const handleVec = new Vec2d(handle.x, handle.y);
-    const center = new Vec2d(w / 2, h / 2);
-    const box = [
-      new Vec2d(0, 0),
-      new Vec2d(w, 0),
-      new Vec2d(w, h),
-      new Vec2d(0, h),
-    ];
-    const intersection = intersectLineSegmentPolygon(handleVec, center, box);
+    const { intersection, offset } = getHandleIntersectionPoint({
+      w,
+      h,
+      handle,
+    });
     if (intersection) {
       const body = new Polygon2d({
         points: [
           new Vec2d(handle.x, handle.y),
-          new Vec2d(intersection[0].x - offset, intersection[0].y),
+          new Vec2d(intersection.x - offset, intersection.y),
           new Vec2d(0, h),
           new Vec2d(0, 0),
           new Vec2d(w, 0),
           new Vec2d(w, h),
-          new Vec2d(intersection[0].x + offset, intersection[0].y),
+          new Vec2d(intersection.x + offset, intersection.y),
         ],
         isFilled: true,
       });
-      return new Group2d({
-        children: [
-          body,
-          new Rectangle2d({
-            width: w,
-            height: h,
-            x: 0,
-            y: 0,
-            isFilled: true,
-            isLabel: true,
-          }),
-        ],
-      });
+      return body;
     }
   }
 
@@ -105,60 +87,52 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return handlesArray;
   }
 
-  // override onBeforeUpdate?:
-  // 	| TLOnBeforeUpdateHandler<SpeechBubbleShape>
-  // 	| undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
-  // 	const {
-  // 		w,
-  // 		h,
-  // 		tailHeight,
-  // 		tailWidth,
-  // 		handles: { handle1, handle2 },
-  // 	} = next.props
+  override onBeforeUpdate:
+    | TLOnBeforeUpdateHandler<SpeechBubbleShape>
+    | undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
+    const { intersection } = getHandleIntersectionPoint({
+      w: next.props.w,
+      h: next.props.h,
+      handle: next.props.handles.handle,
+    });
+    if (!intersection) return _;
+    const intersectionVector = new Vec2d(intersection.x, intersection.y);
+    const handleVector = new Vec2d(
+      next.props.handles.handle.x,
+      next.props.handles.handle.y
+    );
 
-  // 	const newHandle1: HandleType = { ...handle1 }
-  // 	const newHandle2: HandleType = { ...handle2 }
-  // 	const newTail = { tailHeight, tailWidth }
+    const distance = handleVector.dist(intersectionVector);
+    const MIN_DISTANCE = next.props.h / 3;
+    let newPoint = handleVector;
 
-  // 	// If the tail gets too high, move it back down
-  // 	if (handle2.y < h + tailHeight) {
-  // 		newHandle2.y = h + tailHeight
-  // 	}
-  // 	// if the tail gets too small, don't let it invert
-  // 	if (tailWidth < 1) {
-  // 		newTail.tailWidth = 1
-  // 	}
-  // 	//if the corners are out of bounds, move them back in
-  // 	if (handle1.x > w - tailWidth / 2) {
-  // 		newHandle1.x = w - tailWidth / 2
-  // 	}
-  // 	if (handle1.x < 0 + tailWidth / 2) {
-  // 		newHandle1.x = 0 + tailWidth / 2
-  // 	}
-  // 	// when the tail was at its smallest, you could drag it out of bounds
-  // 	// this prevents that
-  // 	if (tailWidth <= 1 && handle1.x > w) {
-  // 		newHandle1.x = w
-  // 	}
-  // 	if (tailWidth <= 1 && handle1.x < 0) {
-  // 		newHandle1.x = 0
-  // 	}
-  // 	// if the tail is wider than the shape, make it the same width
-  // 	if (tailWidth > w) {
-  // 		newHandle1.x = w / 2
-  // 		newTail.tailWidth = w
-  // 	}
+    if (distance <= MIN_DISTANCE) {
+      // Calculate the angle between the handle vector and the shape
+      const angle = Math.atan2(
+        handleVector.y - intersectionVector.y,
+        handleVector.x - intersectionVector.x
+      );
+      console.log(angle);
+      const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
+      newPoint = intersectionVector.add(direction);
+      console.log(newPoint);
+    }
 
-  // 	return {
-  // 		...next,
-  // 		props: {
-  // 			...next.props,
-  // 			tailHeight: newTail.tailHeight,
-  // 			tailWidth: newTail.tailWidth,
-  // 			handles: { handle1: newHandle1, handle2: newHandle2 },
-  // 		},
-  // 	}
-  // }
+    return {
+      ...next,
+      props: {
+        ...next.props,
+        handles: {
+          ...next.props.handles,
+          handle: {
+            ...next.props.handles.handle,
+            x: newPoint.x,
+            y: newPoint.y,
+          },
+        },
+      },
+    };
+  };
 
   override onHandleChange: TLOnHandleChangeHandler<SpeechBubbleShape> = (
     _,
@@ -195,40 +169,41 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
     // Make a copy of the initial shape
     const next = structuredClone(info.initialShape);
+
     next.x = resized.x;
     next.y = resized.y;
     next.props.w = resized.props.w;
     next.props.h = resized.props.h;
 
-    for (const [id, handle] of Object.entries(
-      info.initialShape.props.handles
-    )) {
-      const initialHeight = info.initialBounds.h;
-      const initialWidth = info.initialBounds.w;
+    const initialHeight = info.initialBounds.h;
+    const initialWidth = info.initialBounds.w;
 
-      // Finding the initial normalized position of the handle
-      const normalizedX = handle.x / initialWidth;
-      const normalizedY = handle.y / initialHeight;
+    // Finding the initial normalized position of the handle
+    const normalizedX = next.props.handles.handle.x / initialWidth;
+    const normalizedY = next.props.handles.handle.y / initialHeight;
 
-      const newX = normalizedX * WIDTH_AFTERWARDS;
-      const newY = normalizedY * (next.props.h + next.props.tailHeight);
+    const newX = normalizedX * (next.props.w + next.props.w / 10);
+    const newY =
+      normalizedY *
+      (next.props.h + (next.props.handles.handle.y - next.props.h));
 
-      const nextHandle = next.props.handles[id as HandleType["id"]];
-      nextHandle.x = newX;
-      nextHandle.y = newY;
-    }
+    const nextHandle = next.props.handles.handle;
+    nextHandle.x = newX;
+    nextHandle.y = newY;
 
     return next;
   };
 }
-export function getSpeechBubblePath(shape: SpeechBubbleShape) {
-  const {
-    w,
-    h,
-
-    handles: { handle },
-  } = shape.props;
-  const offset = 10;
+function getHandleIntersectionPoint({
+  w,
+  h,
+  handle,
+}: {
+  w: number;
+  h: number;
+  handle: TLHandle;
+}) {
+  const offset = w / 10;
   const handleVec = new Vec2d(handle.x, handle.y);
   const center = new Vec2d(w / 2, h / 2);
   const box = [
@@ -237,16 +212,36 @@ export function getSpeechBubblePath(shape: SpeechBubbleShape) {
     new Vec2d(w, h),
     new Vec2d(0, h),
   ];
+
   const intersection = intersectLineSegmentPolygon(handleVec, center, box);
+  // A ___I__ M _______ B
+  const a = new Vec2d(w, h);
+  const b = new Vec2d(0, h);
+  const m = new Vec2d(w / 2, h / 2);
+
+  // lerp
+  if (intersection) {
+    return { intersection: intersection[0], offset };
+  }
+  return { intersection: null, offset };
+}
+
+export function getSpeechBubblePath(shape: SpeechBubbleShape) {
+  const {
+    w,
+    h,
+    handles: { handle },
+  } = shape.props;
+  const { intersection, offset } = getHandleIntersectionPoint({ w, h, handle });
   if (intersection) {
     const d = `
             M${handle.x},${handle.y}
-            L${intersection[0].x - offset},${intersection[0].y}
+            L${intersection.x - offset},${intersection.y}
             L-${0},${h}
             L${0},${0}
             L${w},${0}
             L${w},${h}
-            L${intersection[0].x + offset},${intersection[0].y}
+            L${intersection.x + offset},${intersection.y}
             z`;
 
     return d;
