@@ -162,34 +162,37 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
     const resized = resizeBox(shape, info);
-
-    // Make a copy of the initial shape
     const next = structuredClone(info.initialShape);
-
+    console.log(
+      "initial",
+      next.props.handles.handle.x,
+      next.props.handles.handle.y
+    );
     next.x = resized.x;
     next.y = resized.y;
     next.props.w = resized.props.w;
     next.props.h = resized.props.h;
 
-    const initialHeight = info.initialBounds.h;
-    const initialWidth = info.initialBounds.w;
-
-    // Finding the initial normalized position of the handle
-    const normalizedX = next.props.handles.handle.x / initialWidth;
-    const normalizedY = next.props.handles.handle.y / initialHeight;
-
-    const newX = normalizedX * (next.props.w + next.props.w / 10);
-    const newY =
-      normalizedY *
-      (next.props.h + (next.props.handles.handle.y - next.props.h));
-
-    const nextHandle = next.props.handles.handle;
-    nextHandle.x = newX;
-    nextHandle.y = newY;
-
-    return next;
+    const widthRatio = next.props.w / info.initialShape.props.w;
+    const heightRatio = next.props.h / info.initialShape.props.h;
+    //console.log({ widthRatio, heightRatio });
+    const handle = next.props.handles.handle;
+    handle.x *= widthRatio;
+    handle.y *= heightRatio;
+    console.log((handle.x *= widthRatio), (handle.y *= heightRatio));
+    return {
+      ...next,
+      props: {
+        ...next.props,
+        handles: {
+          ...next.props.handles,
+          handle: { ...handle, x: handle.x, y: handle.y },
+        },
+      },
+    };
   };
 }
+
 function getHandleIntersectionPoint({
   w,
   h,
@@ -223,7 +226,6 @@ function getHandleIntersectionPoint({
     let start = new Vec2d(0, h);
     let end = new Vec2d(w, h);
     const intersectionVec = new Vec2d(intersection[0].x, intersection[0].y);
-    console.log({ h, intersectionVec });
 
     if (Math.round(intersectionVec.y) < 4) {
       line = 0;
@@ -236,7 +238,6 @@ function getHandleIntersectionPoint({
       end = new Vec2d(w, h);
     }
     if (Math.round(intersectionVec.y) === Math.round(h)) {
-      console.log("line 2");
       line = 2;
     }
 
