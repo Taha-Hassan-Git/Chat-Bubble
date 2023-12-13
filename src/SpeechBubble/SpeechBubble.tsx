@@ -87,7 +87,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
     const distance = handleVector.dist(intersectionVector);
     const MIN_DISTANCE = next.props.h / 5;
-    const MAX_DISTANCE = next.props.h;
+    const MAX_DISTANCE = next.props.h / 1.2;
     let newPoint = handleVector;
 
     if (distance <= MIN_DISTANCE) {
@@ -209,7 +209,7 @@ function getHandleIntersectionPoint({
     new Vec2d(0, h),
   ];
 
-  let intersection = intersectLineSegmentPolygon(handleVec, center, box);
+  const intersection = intersectLineSegmentPolygon(handleVec, center, box);
   if (intersection) {
     // lines
     ///      0
@@ -223,28 +223,33 @@ function getHandleIntersectionPoint({
     let line: 0 | 1 | 2 | 3 = 2;
     let start = new Vec2d(0, h);
     let end = new Vec2d(w, h);
-    let middle = Vec2d.Med(start, end);
     const intersectionVec = new Vec2d(intersection[0].x, intersection[0].y);
 
+    if (Math.round(intersectionVec.y) < 4) {
+      line = 0;
+      start = new Vec2d(0, 0);
+      end = new Vec2d(w, 0);
+    }
+    if (Math.round(intersectionVec.x) === w) {
+      line = 1;
+      start = new Vec2d(w, 0);
+      end = new Vec2d(w, h);
+    }
     if (Math.round(intersectionVec.y) === h) {
       line = 2;
     }
 
-    if (Math.round(intersectionVec.y) < 4) {
-      line = 0;
-    }
-    if (Math.round(intersectionVec.x) === w) {
-      line = 1;
-    }
     if (Math.round(intersectionVec.x) < 4) {
       line = 3;
+      start = new Vec2d(0, 0);
+      end = new Vec2d(0, h);
     }
     const adjustedIntersection = getAdjustedIntersectionPoint({
       start,
       end,
-      middle,
       intersectionVec,
       line,
+      offset,
     });
     return { intersection: adjustedIntersection, offset, line };
   }
@@ -322,16 +327,52 @@ const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
 const getAdjustedIntersectionPoint = ({
   start,
   end,
-  middle,
+
   intersectionVec,
   line,
+  offset,
 }: {
   start: Vec2d;
   end: Vec2d;
-  middle: Vec2d;
+
   intersectionVec: Vec2d;
   line: 0 | 1 | 2 | 3;
-}): Vec2d => {
-  console.log(intersectionVec);
-  return intersectionVec;
+  offset: number;
+}): Vec2d | null => {
+  // Switch case to determine which line we are intersecting
+  const middle = Vec2d.Med(start, end);
+  // move the intersection along if it's near the corner
+  const nearStart = intersectionVec.dist(start) < offset * 2.5;
+  const nearEnd = intersectionVec.dist(end) < offset * 2.5;
+  let newVec = intersectionVec;
+  console.log({ nearStart, nearEnd, intersectionVec });
+  // linear interpolation between start/end and middle
+
+  switch (line) {
+    case 0:
+    case 2:
+      newVec = intersectionVec;
+      if (nearStart) {
+        newVec.lrp(start.add({ x: offset * 2.5, y: 0 }), 0.6);
+      }
+      if (nearEnd) {
+        newVec.lrp(end.sub({ x: offset * 2.5, y: 0 }), 0.6);
+      }
+      break;
+    case 1:
+    case 3:
+      newVec = intersectionVec;
+      if (nearStart) {
+        newVec.lrp(start.add({ x: 0, y: offset * 2.5 }), 0.6);
+      }
+      if (nearEnd) {
+        newVec.lrp(end.sub({ x: 0, y: offset * 2.5 }), 0.6);
+      }
+      break;
+    default:
+      console.log("Invalid line number", line);
+      return null;
+  }
+
+  return newVec;
 };
