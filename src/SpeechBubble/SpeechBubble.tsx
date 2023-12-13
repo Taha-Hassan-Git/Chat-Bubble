@@ -219,23 +219,24 @@ function getHandleIntersectionPoint({
     //  |           |
     //  -------------
     //        2
-
     let line: 0 | 1 | 2 | 3 = 2;
     let start = new Vec2d(0, h);
     let end = new Vec2d(w, h);
     const intersectionVec = new Vec2d(intersection[0].x, intersection[0].y);
+    console.log({ h, intersectionVec });
 
     if (Math.round(intersectionVec.y) < 4) {
       line = 0;
       start = new Vec2d(0, 0);
       end = new Vec2d(w, 0);
     }
-    if (Math.round(intersectionVec.x) === w) {
+    if (Math.round(intersectionVec.x) === Math.round(w)) {
       line = 1;
       start = new Vec2d(w, 0);
       end = new Vec2d(w, h);
     }
-    if (Math.round(intersectionVec.y) === h) {
+    if (Math.round(intersectionVec.y) === Math.round(h)) {
+      console.log("line 2");
       line = 2;
     }
 
@@ -251,6 +252,7 @@ function getHandleIntersectionPoint({
       line,
       offset,
     });
+
     return { intersection: adjustedIntersection, offset, line };
   }
   return { intersection: null, offset };
@@ -345,7 +347,6 @@ const getAdjustedIntersectionPoint = ({
   const nearStart = intersectionVec.dist(start) < offset * 2.5;
   const nearEnd = intersectionVec.dist(end) < offset * 2.5;
   let newVec = intersectionVec;
-  console.log({ nearStart, nearEnd, intersectionVec });
   // linear interpolation between start/end and middle
 
   switch (line) {
@@ -357,7 +358,9 @@ const getAdjustedIntersectionPoint = ({
       }
       if (nearEnd) {
         newVec.lrp(end.sub({ x: offset * 2.5, y: 0 }), 0.6);
-      }
+      } /* else {
+        newVec.lrp(middle, 0.1);
+      } */
       break;
     case 1:
     case 3:
@@ -367,10 +370,11 @@ const getAdjustedIntersectionPoint = ({
       }
       if (nearEnd) {
         newVec.lrp(end.sub({ x: 0, y: offset * 2.5 }), 0.6);
-      }
+      } /* else {
+        newVec.lrp(middle, 0.1);
+      } */
       break;
     default:
-      console.log("Invalid line number", line);
       return null;
   }
 
