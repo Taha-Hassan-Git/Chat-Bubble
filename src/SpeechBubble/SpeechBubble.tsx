@@ -48,6 +48,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           index: "a1",
           x: 180,
           y: 180,
+
         },
       },
     };
