@@ -48,7 +48,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
           index: "a1",
           x: 180,
           y: 180,
-
         },
       },
     };
@@ -240,6 +239,8 @@ function getHandleIntersectionPoint({
     }
     if (Math.round(intersectionVec.y) === Math.round(h)) {
       line = 2;
+      start = new Vec2d(0, h);
+      end = new Vec2d(w, h);
     }
 
     if (Math.round(intersectionVec.x) < 4) {
@@ -343,42 +344,46 @@ const getAdjustedIntersectionPoint = ({
   line: 0 | 1 | 2 | 3;
   offset: number;
 }): Vec2d | null => {
-  // Switch case to determine which line we are intersecting
-  const middle = Vec2d.Med(start, end);
-  // move the intersection along if it's near the corner
-  const nearStart = intersectionVec.dist(start) < offset * 2.5;
-  const nearEnd = intersectionVec.dist(end) < offset * 2.5;
-  let newVec = intersectionVec;
-  // linear interpolation between start/end and middle
+  // a normalised vector from start to end, so this can work in any direction
+  const unit = Vec2d.Sub(end, start).norm();
 
-  switch (line) {
-    case 0:
-    case 2:
-      newVec = intersectionVec;
-      if (nearStart) {
-        newVec.lrp(start.add({ x: offset * 2.5, y: 0 }), 0.6);
-      }
-      if (nearEnd) {
-        newVec.lrp(end.sub({ x: offset * 2.5, y: 0 }), 0.6);
-      } /* else {
-        newVec.lrp(middle, 0.1);
-      } */
-      break;
-    case 1:
-    case 3:
-      newVec = intersectionVec;
-      if (nearStart) {
-        newVec.lrp(start.add({ x: 0, y: offset * 2.5 }), 0.6);
-      }
-      if (nearEnd) {
-        newVec.lrp(end.sub({ x: 0, y: offset * 2.5 }), 0.6);
-      } /* else {
-        newVec.lrp(middle, 0.1);
-      } */
-      break;
-    default:
-      return null;
-  }
+  const totalDistance = start.dist(end);
+  const distance = intersectionVec.dist(start);
 
-  return newVec;
+  //make it stick to the middle
+  const middleRelative = mapRange(0, totalDistance, -1, 1, distance); // absolute -> -1 to 1
+  const squaredRelative =
+    Math.abs(middleRelative) ** 2 * Math.sign(middleRelative); // do some stuff
+  const squared = mapRange(-1, 1, 0, totalDistance, squaredRelative); // -1 to 1 -> absolute
+
+  //keep it away from the edges
+  const constrained = mapRange(
+    0,
+    totalDistance,
+    offset * 2.5,
+    totalDistance - offset * 2.5,
+    distance
+  );
+
+  // combine the two
+  const interpolated = lerp(constrained, squared, 0.4);
+
+  return unit.mul(interpolated).add(start);
 };
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+function invLerp(a: number, b: number, v: number) {
+  return (v - a) / (b - a);
+}
+/**
+ * Maps a value from one range to another.
+ * e.g. mapRange(10, 20, 50, 100, 15) => 75
+ */
+function mapRange(a1: number, b1: number, a2: number, b2: number, s: number) {
+  return lerp(a2, b2, invLerp(a1, b1, s));
+}
+function clamp(min: number, max: number, v: number) {
+  return Math.min(max, Math.max(min, v));
+}
