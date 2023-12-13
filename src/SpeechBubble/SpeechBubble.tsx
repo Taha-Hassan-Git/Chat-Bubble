@@ -86,10 +86,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     );
 
     const distance = handleVector.dist(intersectionVector);
-    const MIN_DISTANCE = next.props.h / 5;
-    const MAX_DISTANCE = next.props.h / 1.2;
-    let newPoint = handleVector;
+    const topLeft = new Vec2d(0, 0);
+    const bottomRight = new Vec2d(next.props.w, next.props.h);
+    const MIN_DISTANCE = topLeft.dist(bottomRight) / 5;
 
+    const MAX_DISTANCE = topLeft.dist(bottomRight) / 1.5;
+    let newPoint = handleVector;
     if (distance <= MIN_DISTANCE) {
       // Calculate the angle between the handle vector and the shape
       const angle = Math.atan2(
@@ -254,7 +256,6 @@ function getHandleIntersectionPoint({
       start,
       end,
       intersectionVec,
-      line,
       offset: whichOffset,
     });
 
@@ -335,13 +336,11 @@ const getAdjustedIntersectionPoint = ({
   start,
   end,
   intersectionVec,
-  line,
   offset,
 }: {
   start: Vec2d;
   end: Vec2d;
   intersectionVec: Vec2d;
-  line: 0 | 1 | 2 | 3;
   offset: number;
 }): Vec2d | null => {
   // a normalised vector from start to end, so this can work in any direction
@@ -383,7 +382,4 @@ function invLerp(a: number, b: number, v: number) {
  */
 function mapRange(a1: number, b1: number, a2: number, b2: number, s: number) {
   return lerp(a2, b2, invLerp(a1, b1, s));
-}
-function clamp(min: number, max: number, v: number) {
-  return Math.min(max, Math.max(min, v));
 }
