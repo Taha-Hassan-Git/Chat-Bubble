@@ -76,20 +76,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       h: next.props.h,
       handle: next.props.handles.handle,
     });
-    if (!intersection)
-      return {
-        ...next,
-        props: {
-          ...next.props,
-          handles: {
-            ...next.props.handles,
-            handle: {
-              ...next.props.handles.handle,
-              y: _.props.handles.handle.y,
-            },
-          },
-        },
-      };
+
+    if (!intersection) return next;
+
     const intersectionVector = new Vec2d(intersection.x, intersection.y);
     const handleVector = new Vec2d(
       next.props.handles.handle.x,
@@ -97,7 +86,8 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     );
 
     const distance = handleVector.dist(intersectionVector);
-    const MIN_DISTANCE = next.props.h / 3;
+    const MIN_DISTANCE = next.props.h / 5;
+    const MAX_DISTANCE = next.props.h;
     let newPoint = handleVector;
 
     if (distance <= MIN_DISTANCE) {
@@ -108,6 +98,16 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       );
 
       const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
+      newPoint = intersectionVector.add(direction);
+    }
+    if (distance >= MAX_DISTANCE) {
+      // Calculate the angle between the handle vector and the shape
+      const angle = Math.atan2(
+        handleVector.y - intersectionVector.y,
+        handleVector.x - intersectionVector.x
+      );
+
+      const direction = Vec2d.FromAngle(angle, MAX_DISTANCE);
       newPoint = intersectionVector.add(direction);
     }
 
@@ -148,7 +148,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return (
       <>
         <svg className="tl-svg-container">
-          <path d={pathData} stroke={"black"} strokeWidth={2} fill="none" />
+          <path d={pathData} stroke={"black"} strokeWidth={4} fill="none" />
         </svg>
       </>
     );
@@ -209,14 +209,7 @@ function getHandleIntersectionPoint({
     new Vec2d(0, h),
   ];
 
-  const intersection = intersectLineSegmentPolygon(handleVec, center, box);
-
-  // A ___I__ M _______ B
-  const a = new Vec2d(w, h);
-  const b = new Vec2d(0, h);
-  const m = new Vec2d(w / 2, h / 2);
-
-  // lerp
+  let intersection = intersectLineSegmentPolygon(handleVec, center, box);
   if (intersection) {
     // lines
     ///      0
@@ -225,16 +218,35 @@ function getHandleIntersectionPoint({
     // 3|           | 1
     //  |           |
     //  -------------
-    //      2
+    //        2
 
-    let line: 0 | 1 | 2 | 3;
-    console.log({ x: intersection[0].x, y: intersection[0].y });
-    if (Math.round(intersection[0].y) === h) line = 2;
-    if (Math.round(intersection[0].y) < 4) line = 0;
-    if (Math.round(intersection[0].x) === w) line = 1;
-    if (Math.round(intersection[0].x) < 4) line = 3;
-    console.log(line);
-    return { intersection: intersection[0], offset, line };
+    let line: 0 | 1 | 2 | 3 = 2;
+    let start = new Vec2d(0, h);
+    let end = new Vec2d(w, h);
+    let middle = Vec2d.Med(start, end);
+    const intersectionVec = new Vec2d(intersection[0].x, intersection[0].y);
+
+    if (Math.round(intersectionVec.y) === h) {
+      line = 2;
+    }
+
+    if (Math.round(intersectionVec.y) < 4) {
+      line = 0;
+    }
+    if (Math.round(intersectionVec.x) === w) {
+      line = 1;
+    }
+    if (Math.round(intersectionVec.x) < 4) {
+      line = 3;
+    }
+    const adjustedIntersection = getAdjustedIntersectionPoint({
+      start,
+      end,
+      middle,
+      intersectionVec,
+      line,
+    });
+    return { intersection: adjustedIntersection, offset, line };
   }
   return { intersection: null, offset };
 }
@@ -260,6 +272,7 @@ const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
   }
 
   const createTailSegments = (orientation: "horizontal" | "vertical") => {
+    // Is it a horizontal or vertical line? Which line are we intersecting?
     return orientation === "horizontal"
       ? [
           line === 0
@@ -304,4 +317,21 @@ const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
   }
 
   return modifiedSegments;
+};
+
+const getAdjustedIntersectionPoint = ({
+  start,
+  end,
+  middle,
+  intersectionVec,
+  line,
+}: {
+  start: Vec2d;
+  end: Vec2d;
+  middle: Vec2d;
+  intersectionVec: Vec2d;
+  line: 0 | 1 | 2 | 3;
+}): Vec2d => {
+  console.log(intersectionVec);
+  return intersectionVec;
 };
