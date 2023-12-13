@@ -181,7 +181,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const handle = next.props.handles.handle;
     handle.x *= widthRatio;
     handle.y *= heightRatio;
-    console.log((handle.x *= widthRatio), (handle.y *= heightRatio));
     return {
       ...next,
       props: {
