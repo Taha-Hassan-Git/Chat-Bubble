@@ -202,7 +202,7 @@ function getHandleIntersectionPoint({
   h: number;
   handle: TLHandle;
 }) {
-  const offset = w / 10;
+  const offset = { horizontal: w / 10, vertical: h / 10 };
   const handleVec = new Vec2d(handle.x, handle.y);
   const center = new Vec2d(w / 2, h / 2);
   const box = [
@@ -246,12 +246,14 @@ function getHandleIntersectionPoint({
       start = new Vec2d(0, 0);
       end = new Vec2d(0, h);
     }
+    const whichOffset =
+      line === 0 || line === 2 ? offset.horizontal : offset.vertical;
     const adjustedIntersection = getAdjustedIntersectionPoint({
       start,
       end,
       intersectionVec,
       line,
-      offset,
+      offset: whichOffset,
     });
 
     return { intersection: adjustedIntersection, offset, line };
@@ -284,21 +286,21 @@ const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
     return orientation === "horizontal"
       ? [
           line === 0
-            ? new Vec2d(intersection.x - offset, intersection.y)
-            : new Vec2d(intersection.x + offset, intersection.y),
+            ? new Vec2d(intersection.x - offset.horizontal, intersection.y)
+            : new Vec2d(intersection.x + offset.horizontal, intersection.y),
           new Vec2d(handle.x, handle.y),
           line === 0
-            ? new Vec2d(intersection.x + offset, intersection.y)
-            : new Vec2d(intersection.x - offset, intersection.y),
+            ? new Vec2d(intersection.x + offset.horizontal, intersection.y)
+            : new Vec2d(intersection.x - offset.horizontal, intersection.y),
         ]
       : [
           line === 1
-            ? new Vec2d(intersection.x, intersection.y - offset)
-            : new Vec2d(intersection.x, intersection.y + offset),
+            ? new Vec2d(intersection.x, intersection.y - offset.vertical)
+            : new Vec2d(intersection.x, intersection.y + offset.vertical),
           new Vec2d(handle.x, handle.y),
           line === 1
-            ? new Vec2d(intersection.x, intersection.y + offset)
-            : new Vec2d(intersection.x, intersection.y - offset),
+            ? new Vec2d(intersection.x, intersection.y + offset.vertical)
+            : new Vec2d(intersection.x, intersection.y - offset.vertical),
         ];
   };
 
@@ -330,14 +332,12 @@ const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
 const getAdjustedIntersectionPoint = ({
   start,
   end,
-
   intersectionVec,
   line,
   offset,
 }: {
   start: Vec2d;
   end: Vec2d;
-
   intersectionVec: Vec2d;
   line: 0 | 1 | 2 | 3;
   offset: number;
