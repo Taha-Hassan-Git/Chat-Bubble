@@ -12,6 +12,17 @@ import {
   TLHandle,
   intersectLineSegmentPolygon,
   TLOnBeforeUpdateHandler,
+  getDefaultColorTheme,
+  TLDefaultColorStyle,
+  DefaultColorStyle,
+  T,
+  TLDefaultDashStyle,
+  DefaultDashStyle,
+  VecLike,
+  rng,
+  precise,
+  TLDefaultSizeStyle,
+  DefaultSizeStyle,
 } from "@tldraw/tldraw";
 
 type SpeechBubbleShape = TLBaseShape<
@@ -19,15 +30,34 @@ type SpeechBubbleShape = TLBaseShape<
   {
     w: number;
     h: number;
+    size: TLDefaultSizeStyle;
+    dash: TLDefaultDashStyle;
+    color: TLDefaultColorStyle;
     handles: {
       handle: TLHandle;
     };
   }
 >;
-
+export const TL_HANDLE_TYPES = new Set([
+  "vertex",
+  "virtual",
+  "create",
+] as const);
+export const handleValidator = () => true;
 export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   static type = "speech-bubble" as const;
-
+  static override props = {
+    w: T.number,
+    h: T.number,
+    dash: DefaultDashStyle,
+    size: DefaultSizeStyle,
+    color: DefaultColorStyle,
+    handles: {
+      //TODO: Actually validate this
+      validate: handleValidator,
+      handle: { validate: handleValidator },
+    },
+  };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override isAspectRatioLocked = (_shape: SpeechBubbleShape) => false;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -39,6 +69,9 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return {
       w: 200,
       h: 130,
+      dash: "draw",
+      color: "black",
+      size: "m",
       handles: {
         handle: {
           id: "handle1",
@@ -92,23 +125,16 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
     const MAX_DISTANCE = topLeft.dist(bottomRight) / 1.5;
     let newPoint = handleVector;
+    // Calculate the angle between the handle vector and the shape
+    const angle = Math.atan2(
+      handleVector.y - intersectionVector.y,
+      handleVector.x - intersectionVector.x
+    );
     if (distance <= MIN_DISTANCE) {
-      // Calculate the angle between the handle vector and the shape
-      const angle = Math.atan2(
-        handleVector.y - intersectionVector.y,
-        handleVector.x - intersectionVector.x
-      );
-
       const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
       newPoint = intersectionVector.add(direction);
     }
     if (distance >= MAX_DISTANCE) {
-      // Calculate the angle between the handle vector and the shape
-      const angle = Math.atan2(
-        handleVector.y - intersectionVector.y,
-        handleVector.x - intersectionVector.x
-      );
-
       const direction = Vec2d.FromAngle(angle, MAX_DISTANCE);
       newPoint = intersectionVector.add(direction);
     }
@@ -145,12 +171,26 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   };
 
   component(shape: SpeechBubbleShape) {
+    const theme = getDefaultColorTheme({
+      isDarkMode: this.editor.user.isDarkMode,
+    });
     const geometry = getSpeechBubbleGeometry(shape);
     const pathData = "M" + geometry[0] + "L" + geometry.slice(1) + "Z";
+    const STROKE_SIZES = {
+      s: 2,
+      m: 3.5,
+      l: 5,
+      xl: 10,
+    };
     return (
       <>
         <svg className="tl-svg-container">
-          <path d={pathData} stroke={"black"} strokeWidth={4} fill="none" />
+          <path
+            d={pathData}
+            strokeWidth={STROKE_SIZES[shape.props.size]}
+            stroke={theme[shape.props.color].solid}
+            fill={"none"}
+          />
         </svg>
       </>
     );
@@ -165,11 +205,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override onResize: TLOnResizeHandler<SpeechBubbleShape> = (shape, info) => {
     const resized = resizeBox(shape, info);
     const next = structuredClone(info.initialShape);
-    console.log(
-      "initial",
-      next.props.handles.handle.x,
-      next.props.handles.handle.y
-    );
+
     next.x = resized.x;
     next.y = resized.y;
     next.props.w = resized.props.w;
@@ -177,7 +213,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
 
     const widthRatio = next.props.w / info.initialShape.props.w;
     const heightRatio = next.props.h / info.initialShape.props.h;
-    //console.log({ widthRatio, heightRatio });
     const handle = next.props.handles.handle;
     handle.x *= widthRatio;
     handle.y *= heightRatio;
@@ -213,54 +248,38 @@ function getHandleIntersectionPoint({
     new Vec2d(0, h),
   ];
 
-  const intersection = intersectLineSegmentPolygon(handleVec, center, box);
-  if (intersection) {
-    // lines
-    ///      0
-    //  _____________
-    //  |           |
-    // 3|           | 1
-    //  |           |
-    //  -------------
-    //        2
-    let line: 0 | 1 | 2 | 3 = 2;
-    let start = new Vec2d(0, h);
-    let end = new Vec2d(w, h);
-    const intersectionVec = new Vec2d(intersection[0].x, intersection[0].y);
+  const { result, line } = checkIntersection(handleVec, center, box);
+  let intersection = result;
 
-    if (Math.round(intersectionVec.y) < 4) {
-      line = 0;
-      start = new Vec2d(0, 0);
-      end = new Vec2d(w, 0);
-    }
-    if (Math.round(intersectionVec.x) === Math.round(w)) {
-      line = 1;
-      start = new Vec2d(w, 0);
-      end = new Vec2d(w, h);
-    }
-    if (Math.round(intersectionVec.y) === Math.round(h)) {
-      line = 2;
-      start = new Vec2d(0, h);
-      end = new Vec2d(w, h);
-    }
+  // lines
+  ///      0
+  //  _____________
+  //  |           |
+  // 3|           | 1
+  //  |           |
+  //  -------------
+  //        2
 
-    if (Math.round(intersectionVec.x) < 4) {
-      line = 3;
-      start = new Vec2d(0, 0);
-      end = new Vec2d(0, h);
-    }
-    const whichOffset =
-      line === 0 || line === 2 ? offset.horizontal : offset.vertical;
-    const adjustedIntersection = getAdjustedIntersectionPoint({
-      start,
-      end,
-      intersectionVec,
-      offset: whichOffset,
-    });
+  const intersectionVec = new Vec2d(intersection[0].x, intersection[0].y);
+  const lineCoordinates = {
+    0: { start: new Vec2d(0, 0), end: new Vec2d(w, 0) },
+    1: { start: new Vec2d(w, 0), end: new Vec2d(w, h) },
+    2: { start: new Vec2d(0, h), end: new Vec2d(w, h) },
+    3: { start: new Vec2d(0, 0), end: new Vec2d(0, h) },
+  };
 
-    return { intersection: adjustedIntersection, offset, line };
-  }
-  return { intersection: null, offset };
+  const { start, end } = lineCoordinates[line];
+  const whichOffset =
+    line === 0 || line === 2 ? offset.horizontal : offset.vertical;
+
+  const adjustedIntersection = getAdjustedIntersectionPoint({
+    start,
+    end,
+    intersectionVec,
+    offset: whichOffset,
+  });
+
+  return { intersection: adjustedIntersection, offset, line };
 }
 
 const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
@@ -325,7 +344,7 @@ const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
       ];
       break;
     default:
-      throw new Error("Invalid line number");
+      console.log("default");
   }
 
   return modifiedSegments;
@@ -381,4 +400,67 @@ function invLerp(a: number, b: number, v: number) {
  */
 function mapRange(a1: number, b1: number, a2: number, b2: number, s: number) {
   return lerp(a2, b2, invLerp(a1, b1, s));
+}
+
+function checkIntersection(
+  a1: Vec2d,
+  a2: Vec2d,
+  points: Vec2d[]
+): { result: VecLike[]; line: number } | null {
+  const result: VecLike[] = [];
+  let segmentIntersection: VecLike | null;
+
+  for (let i = 1, n = points.length; i < n + 1; i++) {
+    segmentIntersection = intersectLineSegmentLineSegment(
+      a1,
+      a2,
+      points[i - 1],
+      points[i % points.length]
+    );
+
+    if (segmentIntersection) {
+      console.log(i);
+      result.push(segmentIntersection);
+      return { result, line: i - 1 };
+    }
+  }
+  //We're inside the shape, cast outwards to find the intersection
+  const angle = Math.atan2(a1.y - a2.y, a1.x - a2.x);
+  //the third points coordinates are the same as the height and width of the shape
+  const direction = Vec2d.FromAngle(angle, Math.max(points[2].x, points[2].y));
+  const newPoint = a1.add(direction);
+  const intersection = checkIntersection(newPoint, a2, points);
+  if (!intersection) return null;
+  return { result: intersection.result, line: intersection.line };
+}
+
+function intersectLineSegmentLineSegment(
+  a1: VecLike,
+  a2: VecLike,
+  b1: VecLike,
+  b2: VecLike
+) {
+  const ABx = a1.x - b1.x;
+  const ABy = a1.y - b1.y;
+  const BVx = b2.x - b1.x;
+  const BVy = b2.y - b1.y;
+  const AVx = a2.x - a1.x;
+  const AVy = a2.y - a1.y;
+  const ua_t = BVx * ABy - BVy * ABx;
+  const ub_t = AVx * ABy - AVy * ABx;
+  const u_b = BVy * AVx - BVx * AVy;
+
+  if (ua_t === 0 || ub_t === 0) return null; // coincident
+
+  if (u_b === 0) return null; // parallel
+
+  if (u_b !== 0) {
+    const ua = ua_t / u_b;
+    const ub = ub_t / u_b;
+    if (0 <= ua && ua <= 1 && 0 <= ub && ub <= 1) {
+      return Vec2d.AddXY(a1, ua * AVx, ua * AVy);
+    }
+  }
+
+  return null; // no intersection
 }

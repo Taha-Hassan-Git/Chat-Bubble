@@ -9,8 +9,10 @@ export const uiOverrides: TLUiOverrides = {
   tools(editor, tools) {
     tools.speech = {
       id: "speech-bubble",
+      //TODO: add icon
       icon: "color",
-      label: "speech-bubble" as any,
+      //TODO: add label
+      label: "tool.arrow",
       kbd: "c",
       readonlyOk: false,
       onSelect: () => {
@@ -29,5 +31,11 @@ export const uiOverrides: TLUiOverrides = {
     ) as TLUiMenuGroup;
     toolsGroup.children.push(menuItem(tools.speech));
     return keyboardShortcutsMenu;
+  },
+};
+
+export const customAssetUrls: TLUiAssetUrlOverrides = {
+  icons: {
+    "speech-bubble": "/speech-bubble.svg",
   },
 };
