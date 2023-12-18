@@ -10,7 +10,6 @@ import {
   deepCopy,
   structuredClone,
   TLHandle,
-  intersectLineSegmentPolygon,
   TLOnBeforeUpdateHandler,
   getDefaultColorTheme,
   TLDefaultColorStyle,
@@ -19,8 +18,6 @@ import {
   TLDefaultDashStyle,
   DefaultDashStyle,
   VecLike,
-  rng,
-  precise,
   TLDefaultSizeStyle,
   DefaultSizeStyle,
 } from "@tldraw/tldraw";
@@ -104,7 +101,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override onBeforeUpdate:
     | TLOnBeforeUpdateHandler<SpeechBubbleShape>
     | undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
-    const { intersection } = getHandleIntersectionPoint({
+    const { intersection, insideShape } = getHandleIntersectionPoint({
       w: next.props.w,
       h: next.props.h,
       handle: next.props.handles.handle,
@@ -121,6 +118,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     const distance = handleVector.dist(intersectionVector);
     const topLeft = new Vec2d(0, 0);
     const bottomRight = new Vec2d(next.props.w, next.props.h);
+    const center = new Vec2d(next.props.w / 2, next.props.h / 2);
     const MIN_DISTANCE = topLeft.dist(bottomRight) / 5;
 
     const MAX_DISTANCE = topLeft.dist(bottomRight) / 1.5;
@@ -130,6 +128,28 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       handleVector.y - intersectionVector.y,
       handleVector.x - intersectionVector.x
     );
+    if (insideShape) {
+      const centerAngle = Math.atan2(
+        handleVector.y - center.y,
+        handleVector.x - center.x
+      );
+      const direction = Vec2d.FromAngle(centerAngle, MIN_DISTANCE);
+      newPoint = intersectionVector.add(direction);
+      return {
+        ...next,
+        props: {
+          ...next.props,
+          handles: {
+            ...next.props.handles,
+            handle: {
+              ...next.props.handles.handle,
+              x: newPoint.x,
+              y: newPoint.y,
+            },
+          },
+        },
+      };
+    }
     if (distance <= MIN_DISTANCE) {
       const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
       newPoint = intersectionVector.add(direction);
@@ -248,8 +268,9 @@ function getHandleIntersectionPoint({
     new Vec2d(0, h),
   ];
 
-  const { result, line } = checkIntersection(handleVec, center, box);
-  let intersection = result;
+  const result = checkIntersection(handleVec, center, box);
+  if (!result) return { intersection: null, offset: null, line: null };
+  const { result: intersection, line } = result;
 
   // lines
   ///      0
@@ -268,6 +289,7 @@ function getHandleIntersectionPoint({
     3: { start: new Vec2d(0, 0), end: new Vec2d(0, h) },
   };
 
+  // what cool typescript thing can I do here? I want to make sure that the line is one of the keys of lineCoordinates
   const { start, end } = lineCoordinates[line];
   const whichOffset =
     line === 0 || line === 2 ? offset.horizontal : offset.vertical;
@@ -279,7 +301,12 @@ function getHandleIntersectionPoint({
     offset: whichOffset,
   });
 
-  return { intersection: adjustedIntersection, offset, line };
+  return {
+    intersection: adjustedIntersection,
+    offset,
+    line,
+    insideShape: result.insideShape,
+  };
 }
 
 const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
@@ -406,7 +433,7 @@ function checkIntersection(
   a1: Vec2d,
   a2: Vec2d,
   points: Vec2d[]
-): { result: VecLike[]; line: number } | null {
+): { result: VecLike[]; line: number; insideShape?: boolean } | null {
   const result: VecLike[] = [];
   let segmentIntersection: VecLike | null;
 
@@ -419,7 +446,6 @@ function checkIntersection(
     );
 
     if (segmentIntersection) {
-      console.log(i);
       result.push(segmentIntersection);
       return { result, line: i - 1 };
     }
@@ -431,7 +457,11 @@ function checkIntersection(
   const newPoint = a1.add(direction);
   const intersection = checkIntersection(newPoint, a2, points);
   if (!intersection) return null;
-  return { result: intersection.result, line: intersection.line };
+  return {
+    result: intersection.result,
+    line: intersection.line,
+    insideShape: true,
+  };
 }
 
 function intersectLineSegmentLineSegment(
