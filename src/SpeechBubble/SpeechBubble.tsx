@@ -101,13 +101,13 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override onBeforeUpdate:
     | TLOnBeforeUpdateHandler<SpeechBubbleShape>
     | undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
-    const { intersection, insideShape } = getHandleIntersectionPoint({
+    const { intersection, insideShape, line } = getHandleIntersectionPoint({
       w: next.props.w,
       h: next.props.h,
       handle: next.props.handles.handle,
     });
 
-    if (!intersection) return next;
+    if (!intersection) throw new Error("No intersection");
 
     const intersectionVector = new Vec2d(intersection.x, intersection.y);
     const handleVector = new Vec2d(
@@ -115,25 +115,28 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       next.props.handles.handle.y
     );
 
-    const distance = handleVector.dist(intersectionVector);
     const topLeft = new Vec2d(0, 0);
     const bottomRight = new Vec2d(next.props.w, next.props.h);
     const center = new Vec2d(next.props.w / 2, next.props.h / 2);
     const MIN_DISTANCE = topLeft.dist(bottomRight) / 5;
 
     const MAX_DISTANCE = topLeft.dist(bottomRight) / 1.5;
+
+    const distanceToIntersection = handleVector.dist(intersectionVector);
+    const angle = Math.atan2(
+      handleVector.y - center.y,
+      handleVector.x - center.x
+    );
     let newPoint = handleVector;
     // Calculate the angle between the handle vector and the shape
-    const angle = Math.atan2(
-      handleVector.y - intersectionVector.y,
-      handleVector.x - intersectionVector.x
-    );
+    const distanceToLine = getDistanceToLine({
+      angle,
+      distanceToIntersection,
+      line,
+    });
     if (insideShape) {
-      const centerAngle = Math.atan2(
-        handleVector.y - center.y,
-        handleVector.x - center.x
-      );
-      const direction = Vec2d.FromAngle(centerAngle, MIN_DISTANCE);
+      console.log("inside shape");
+      const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
       newPoint = intersectionVector.add(direction);
       return {
         ...next,
@@ -150,11 +153,13 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
         },
       };
     }
-    if (distance <= MIN_DISTANCE) {
-      const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
+    if (distanceToLine <= MIN_DISTANCE) {
+      console.log("min distance");
+      const newDistance = MIN_DISTANCE;
+      const direction = Vec2d.FromAngle(angle, newDistance);
       newPoint = intersectionVector.add(direction);
     }
-    if (distance >= MAX_DISTANCE) {
+    if (distanceToLine >= MAX_DISTANCE) {
       const direction = Vec2d.FromAngle(angle, MAX_DISTANCE);
       newPoint = intersectionVector.add(direction);
     }
@@ -430,8 +435,8 @@ function mapRange(a1: number, b1: number, a2: number, b2: number, s: number) {
 }
 
 function checkIntersection(
-  a1: Vec2d,
-  a2: Vec2d,
+  handle: Vec2d,
+  center: Vec2d,
   points: Vec2d[]
 ): { result: VecLike[]; line: number; insideShape?: boolean } | null {
   const result: VecLike[] = [];
@@ -439,8 +444,8 @@ function checkIntersection(
 
   for (let i = 1, n = points.length; i < n + 1; i++) {
     segmentIntersection = intersectLineSegmentLineSegment(
-      a1,
-      a2,
+      handle,
+      center,
       points[i - 1],
       points[i % points.length]
     );
@@ -450,12 +455,12 @@ function checkIntersection(
       return { result, line: i - 1 };
     }
   }
-  //We're inside the shape, cast outwards to find the intersection
-  const angle = Math.atan2(a1.y - a2.y, a1.x - a2.x);
-  //the third points coordinates are the same as the height and width of the shape
+  //We're inside the shape, look backwards to find the intersection
+  const angle = Math.atan2(handle.y - center.y, handle.x - center.x);
+  //the third point's coordinates are the same as the height and width of the shape
   const direction = Vec2d.FromAngle(angle, Math.max(points[2].x, points[2].y));
-  const newPoint = a1.add(direction);
-  const intersection = checkIntersection(newPoint, a2, points);
+  const newPoint = handle.add(direction);
+  const intersection = checkIntersection(newPoint, center, points);
   if (!intersection) return null;
   return {
     result: intersection.result,
@@ -493,4 +498,40 @@ function intersectLineSegmentLineSegment(
   }
 
   return null; // no intersection
+}
+function getDistanceToLine({ angle, distanceToIntersection, line }) {
+  const normals = {
+    0: { x: 0, y: -1 }, // Top side
+    1: { x: 1, y: 0 }, // Right side
+    2: { x: 0, y: 1 }, // Bottom side
+    3: { x: -1, y: 0 }, // Left side
+  };
+
+  const normalVectorAngle = Math.atan2(normals[line].y, normals[line].x);
+  const normalizedHandleAngle = (angle + 2 * Math.PI) % (2 * Math.PI);
+  const normalizedNormalVectorAngle =
+    (normalVectorAngle + 2 * Math.PI) % (2 * Math.PI);
+
+  let angleDifference = normalizedHandleAngle - normalizedNormalVectorAngle;
+
+  // Normalize the angle difference to be within the range -π to π
+  if (angleDifference > Math.PI) {
+    angleDifference -= 2 * Math.PI;
+  } else if (angleDifference < -Math.PI) {
+    angleDifference += 2 * Math.PI;
+  }
+
+  // Correct for angles beyond π/2 to reflect the perpendicular relationship
+  let correctedAngle;
+  if (Math.abs(angleDifference) <= Math.PI / 2) {
+    correctedAngle = Math.PI / 2 - Math.abs(angleDifference);
+  } else {
+    correctedAngle = Math.abs(angleDifference) - Math.PI / 2;
+  }
+
+  // Use the sine of the corrected angle to calculate the perpendicular distance
+  const distanceToLine = distanceToIntersection * Math.sin(correctedAngle);
+
+  console.log("Perpendicular distance to the line", distanceToLine);
+  return distanceToLine;
 }

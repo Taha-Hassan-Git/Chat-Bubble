@@ -34,8 +34,8 @@ export const uiOverrides: TLUiOverrides = {
   },
 };
 
-export const customAssetUrls: TLUiAssetUrlOverrides = {
+/* export const customAssetUrls: TLUiAssetUrlOverrides = {
   icons: {
     "speech-bubble": "/speech-bubble.svg",
   },
-};
+}; */

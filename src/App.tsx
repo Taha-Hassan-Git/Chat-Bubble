@@ -3,7 +3,7 @@ import { Tldraw } from "@tldraw/tldraw";
 import "@tldraw/tldraw/tldraw.css";
 import { SpeechBubbleUtil } from "./SpeechBubble/SpeechBubble";
 import { SpeechBubbleTool } from "./SpeechBubble/SpeechBubbleTool";
-import { customAssetUrls, uiOverrides } from "./SpeechBubble/ui-overrides";
+import { uiOverrides } from "./SpeechBubble/ui-overrides";
 
 const shapeUtils = [SpeechBubbleUtil];
 const tools = [SpeechBubbleTool];
@@ -15,7 +15,7 @@ function App() {
         shapeUtils={shapeUtils}
         tools={tools}
         overrides={uiOverrides}
-        assetUrls={customAssetUrls}
+        //assetUrls={customAssetUrls}
         persistenceKey="whatever"
       />
     </div>
