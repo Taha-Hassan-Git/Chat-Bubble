@@ -1,4 +1,4 @@
-import { TLHandle, Vec2d, VecLike } from "@tldraw/tldraw";
+import { TLHandle, Vec2d, VecLike, lerp } from "@tldraw/tldraw";
 import { SpeechBubbleShape } from "./SpeechBubble";
 
 export const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
@@ -176,32 +176,6 @@ export const getAdjustedIntersectionPoint = ({
   return unit.mul(interpolated).add(start);
 };
 
-/**
- * Linear interpolation
- */
-export function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
-/**
- * Inverse linear interpolation
- */
-export function invLerp(a: number, b: number, v: number) {
-  return (v - a) / (b - a);
-}
-/**
- * Maps a value from one range to another.
- * e.g. mapRange(10, 20, 50, 100, 15) => 75
- */
-export function mapRange(
-  a1: number,
-  b1: number,
-  a2: number,
-  b2: number,
-  s: number
-) {
-  return lerp(a2, b2, invLerp(a1, b1, s));
-}
-
 // This works similarly to the function intersectLineSegmentPolygon in the tldraw codebase,
 // but we want to return which line was intersected, and also call the function recursively
 export function checkIntersection(
@@ -270,4 +244,24 @@ export function intersectLineSegmentLineSegment(
   }
 
   return null; // no intersection
+}
+
+/**
+ * Inverse linear interpolation
+ */
+export function invLerp(a: number, b: number, v: number) {
+  return (v - a) / (b - a);
+}
+/**
+ * Maps a value from one range to another.
+ * e.g. mapRange(10, 20, 50, 100, 15) => 75
+ */
+export function mapRange(
+  a1: number,
+  b1: number,
+  a2: number,
+  b2: number,
+  s: number
+) {
+  return lerp(a2, b2, invLerp(a1, b1, s));
 }
