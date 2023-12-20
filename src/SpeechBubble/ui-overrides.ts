@@ -9,11 +9,10 @@ export const uiOverrides: TLUiOverrides = {
   tools(editor, tools) {
     tools.speech = {
       id: "speech-bubble",
-      //TODO: add icon
-      icon: "color",
-      //TODO: add label
-      label: "tool.arrow",
-      kbd: "c",
+      //get rid of typescript error?
+      icon: "speech-bubble",
+      label: "Speech Bubble",
+      kbd: "s",
       readonlyOk: false,
       onSelect: () => {
         editor.setCurrentTool("speech-bubble");
@@ -34,8 +33,8 @@ export const uiOverrides: TLUiOverrides = {
   },
 };
 
-/* export const customAssetUrls: TLUiAssetUrlOverrides = {
+export const customAssetUrls: TLUiAssetUrlOverrides = {
   icons: {
-    "speech-bubble": "/speech-bubble.svg",
+    "speech-bubble": "/src/SpeechBubble/assets/speech-bubble.svg",
   },
-}; */
+};

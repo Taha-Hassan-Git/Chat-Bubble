@@ -15,16 +15,10 @@ import {
   TLDefaultColorStyle,
   DefaultColorStyle,
   T,
-  TLDefaultDashStyle,
-  DefaultDashStyle,
   TLDefaultSizeStyle,
   DefaultSizeStyle,
 } from "@tldraw/tldraw";
-import {
-  getSpeechBubbleGeometry,
-  getHandleIntersectionPoint,
-  getDistanceToLine,
-} from "./helpers";
+import { getSpeechBubbleGeometry, getHandleIntersectionPoint } from "./helpers";
 
 export type SpeechBubbleShape = TLBaseShape<
   "speech-bubble",
@@ -32,7 +26,6 @@ export type SpeechBubbleShape = TLBaseShape<
     w: number;
     h: number;
     size: TLDefaultSizeStyle;
-    dash: TLDefaultDashStyle;
     color: TLDefaultColorStyle;
     handles: {
       handle: TLHandle;
@@ -50,7 +43,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   static override props = {
     w: T.number,
     h: T.number,
-    dash: DefaultDashStyle,
     size: DefaultSizeStyle,
     color: DefaultColorStyle,
     handles: {
@@ -70,7 +62,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return {
       w: 200,
       h: 130,
-      dash: "draw",
       color: "black",
       size: "m",
       handles: {
@@ -105,15 +96,12 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   override onBeforeUpdate:
     | TLOnBeforeUpdateHandler<SpeechBubbleShape>
     | undefined = (_: SpeechBubbleShape, next: SpeechBubbleShape) => {
-    const {
-      originalIntersection: intersection,
-      insideShape,
-      line,
-    } = getHandleIntersectionPoint({
-      w: next.props.w,
-      h: next.props.h,
-      handle: next.props.handles.handle,
-    });
+    const { originalIntersection: intersection, insideShape } =
+      getHandleIntersectionPoint({
+        w: next.props.w,
+        h: next.props.h,
+        handle: next.props.handles.handle,
+      });
 
     if (!intersection) throw new Error("No intersection");
 
@@ -136,12 +124,7 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
       handleVector.x - center.x
     );
     let newPoint = handleVector;
-    // Calculate the angle between the handle vector and the shape
-    const distanceToLine = getDistanceToLine({
-      angle,
-      distanceToIntersection,
-      line,
-    });
+
     if (insideShape) {
       const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
       newPoint = intersectionVector.add(direction);
@@ -160,12 +143,11 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
         },
       };
     }
-    if (distanceToLine <= MIN_DISTANCE) {
+    if (distanceToIntersection <= MIN_DISTANCE) {
       const direction = Vec2d.FromAngle(angle, MIN_DISTANCE);
       newPoint = intersectionVector.add(direction);
     }
     if (distanceToIntersection >= MAX_DISTANCE) {
-      console.log("MAX_DISTANCE");
       const direction = Vec2d.FromAngle(angle, MAX_DISTANCE);
       newPoint = intersectionVector.add(direction);
     }
