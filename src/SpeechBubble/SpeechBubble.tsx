@@ -15,8 +15,6 @@ import {
   TLDefaultColorStyle,
   DefaultColorStyle,
   T,
-  TLDefaultDashStyle,
-  DefaultDashStyle,
   TLDefaultSizeStyle,
   DefaultSizeStyle,
 } from "@tldraw/tldraw";
@@ -28,7 +26,6 @@ export type SpeechBubbleShape = TLBaseShape<
     w: number;
     h: number;
     size: TLDefaultSizeStyle;
-    dash: TLDefaultDashStyle;
     color: TLDefaultColorStyle;
     handles: {
       handle: TLHandle;
@@ -46,7 +43,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
   static override props = {
     w: T.number,
     h: T.number,
-    dash: DefaultDashStyle,
     size: DefaultSizeStyle,
     color: DefaultColorStyle,
     handles: {
@@ -66,7 +62,6 @@ export class SpeechBubbleUtil extends ShapeUtil<SpeechBubbleShape> {
     return {
       w: 200,
       h: 130,
-      dash: "draw",
       color: "black",
       size: "m",
       handles: {

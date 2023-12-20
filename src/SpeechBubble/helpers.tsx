@@ -1,6 +1,79 @@
 import { TLHandle, Vec2d, VecLike } from "@tldraw/tldraw";
 import { SpeechBubbleShape } from "./SpeechBubble";
 
+export const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
+  const {
+    adjustedIntersection: intersection,
+    offset,
+    line,
+  } = getHandleIntersectionPoint({
+    w: shape.props.w,
+    h: shape.props.h,
+    handle: shape.props.handles.handle,
+  });
+
+  const handle = shape.props.handles.handle;
+
+  const initialSegments = [
+    new Vec2d(0, 0),
+    new Vec2d(shape.props.w, 0),
+    new Vec2d(shape.props.w, shape.props.h),
+    new Vec2d(0, shape.props.h),
+  ];
+
+  if (!intersection) {
+    throw new Error("No intersection");
+  }
+
+  const createTailSegments = (orientation: "horizontal" | "vertical") => {
+    // Is it a horizontal or vertical line? Which line are we intersecting?
+    return orientation === "horizontal"
+      ? [
+          line === 0
+            ? new Vec2d(intersection.x - offset.horizontal, intersection.y)
+            : new Vec2d(intersection.x + offset.horizontal, intersection.y),
+          new Vec2d(handle.x, handle.y),
+          line === 0
+            ? new Vec2d(intersection.x + offset.horizontal, intersection.y)
+            : new Vec2d(intersection.x - offset.horizontal, intersection.y),
+        ]
+      : [
+          line === 1
+            ? new Vec2d(intersection.x, intersection.y - offset.vertical)
+            : new Vec2d(intersection.x, intersection.y + offset.vertical),
+          new Vec2d(handle.x, handle.y),
+          line === 1
+            ? new Vec2d(intersection.x, intersection.y + offset.vertical)
+            : new Vec2d(intersection.x, intersection.y - offset.vertical),
+        ];
+  };
+
+  let modifiedSegments = [...initialSegments];
+
+  // Inject the tail segments into the geometry of the shape
+  switch (line) {
+    case 0:
+      modifiedSegments.splice(1, 0, ...createTailSegments("horizontal"));
+      break;
+    case 1:
+      modifiedSegments.splice(2, 0, ...createTailSegments("vertical"));
+      break;
+    case 2:
+      modifiedSegments.splice(3, 0, ...createTailSegments("horizontal"));
+      break;
+    case 3:
+      modifiedSegments = [
+        ...modifiedSegments,
+        ...createTailSegments("vertical"),
+      ];
+      break;
+    default:
+      console.log("default");
+  }
+
+  return modifiedSegments;
+};
+
 export function getHandleIntersectionPoint({
   w,
   h,
@@ -41,11 +114,11 @@ export function getHandleIntersectionPoint({
     3: { start: new Vec2d(0, 0), end: new Vec2d(0, h) },
   };
 
-  // what cool typescript thing can I do here? I want to make sure that the line is one of the keys of lineCoordinates
   const { start, end } = lineCoordinates[line];
   const whichOffset =
     line === 0 || line === 2 ? offset.horizontal : offset.vertical;
 
+  // let's make the intersection more likely to be in the middle and also stay away from the edges
   const adjustedIntersection = getAdjustedIntersectionPoint({
     start,
     end,
@@ -53,82 +126,16 @@ export function getHandleIntersectionPoint({
     offset: whichOffset,
   });
 
+  // We need the adjusted intersection to draw the tail, but the original intersection
+  // for the onBeforeUpdate handler
   return {
     originalIntersection: intersectionVec,
-    intersection: adjustedIntersection,
+    adjustedIntersection: adjustedIntersection,
     offset,
     line,
     insideShape: result.insideShape,
   };
 }
-
-export const getSpeechBubbleGeometry = (shape: SpeechBubbleShape): Vec2d[] => {
-  const { intersection, offset, line } = getHandleIntersectionPoint({
-    w: shape.props.w,
-    h: shape.props.h,
-    handle: shape.props.handles.handle,
-  });
-
-  const handle = shape.props.handles.handle;
-
-  const initialSegments = [
-    new Vec2d(0, 0),
-    new Vec2d(shape.props.w, 0),
-    new Vec2d(shape.props.w, shape.props.h),
-    new Vec2d(0, shape.props.h),
-  ];
-
-  if (!intersection) {
-    return initialSegments;
-  }
-
-  const createTailSegments = (orientation: "horizontal" | "vertical") => {
-    // Is it a horizontal or vertical line? Which line are we intersecting?
-    return orientation === "horizontal"
-      ? [
-          line === 0
-            ? new Vec2d(intersection.x - offset.horizontal, intersection.y)
-            : new Vec2d(intersection.x + offset.horizontal, intersection.y),
-          new Vec2d(handle.x, handle.y),
-          line === 0
-            ? new Vec2d(intersection.x + offset.horizontal, intersection.y)
-            : new Vec2d(intersection.x - offset.horizontal, intersection.y),
-        ]
-      : [
-          line === 1
-            ? new Vec2d(intersection.x, intersection.y - offset.vertical)
-            : new Vec2d(intersection.x, intersection.y + offset.vertical),
-          new Vec2d(handle.x, handle.y),
-          line === 1
-            ? new Vec2d(intersection.x, intersection.y + offset.vertical)
-            : new Vec2d(intersection.x, intersection.y - offset.vertical),
-        ];
-  };
-
-  let modifiedSegments = [...initialSegments];
-
-  switch (line) {
-    case 0:
-      modifiedSegments.splice(1, 0, ...createTailSegments("horizontal"));
-      break;
-    case 1:
-      modifiedSegments.splice(2, 0, ...createTailSegments("vertical"));
-      break;
-    case 2:
-      modifiedSegments.splice(3, 0, ...createTailSegments("horizontal"));
-      break;
-    case 3:
-      modifiedSegments = [
-        ...modifiedSegments,
-        ...createTailSegments("vertical"),
-      ];
-      break;
-    default:
-      console.log("default");
-  }
-
-  return modifiedSegments;
-};
 
 export const getAdjustedIntersectionPoint = ({
   start,
@@ -144,33 +151,40 @@ export const getAdjustedIntersectionPoint = ({
   // a normalised vector from start to end, so this can work in any direction
   const unit = Vec2d.Sub(end, start).norm();
 
+  // Where is the intersection relative to the start?
   const totalDistance = start.dist(end);
   const distance = intersectionVec.dist(start);
 
-  //make it stick to the middle
   const middleRelative = mapRange(0, totalDistance, -1, 1, distance); // absolute -> -1 to 1
   const squaredRelative =
-    Math.abs(middleRelative) ** 2 * Math.sign(middleRelative); // do some stuff
+    Math.abs(middleRelative) ** 2 * Math.sign(middleRelative); // square it and keep the sign
+  // make it stick to the middle
   const squared = mapRange(-1, 1, 0, totalDistance, squaredRelative); // -1 to 1 -> absolute
 
   //keep it away from the edges
   const constrained = mapRange(
     0,
     totalDistance,
-    offset * 2.5,
-    totalDistance - offset * 2.5,
+    offset * 3,
+    totalDistance - offset * 3,
     distance
   );
 
   // combine the two
-  const interpolated = lerp(constrained, squared, 0.4);
+  const interpolated = lerp(constrained, squared, 0.5);
 
   return unit.mul(interpolated).add(start);
 };
 
+/**
+ * Linear interpolation
+ */
 export function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
+/**
+ * Inverse linear interpolation
+ */
 export function invLerp(a: number, b: number, v: number) {
   return (v - a) / (b - a);
 }
@@ -188,6 +202,8 @@ export function mapRange(
   return lerp(a2, b2, invLerp(a1, b1, s));
 }
 
+// This works similarly to the function intersectLineSegmentPolygon in the tldraw codebase,
+// but we want to return which line was intersected, and also call the function recursively
 export function checkIntersection(
   handle: Vec2d,
   center: Vec2d,
@@ -214,6 +230,7 @@ export function checkIntersection(
   //the third point's coordinates are the same as the height and width of the shape
   const direction = Vec2d.FromAngle(angle, Math.max(points[2].x, points[2].y));
   const newPoint = handle.add(direction);
+  // Call this function again with the new point
   const intersection = checkIntersection(newPoint, center, points);
   if (!intersection) return null;
   return {
@@ -223,6 +240,7 @@ export function checkIntersection(
   };
 }
 
+// This function is copied from the tldraw codebase
 export function intersectLineSegmentLineSegment(
   a1: VecLike,
   a2: VecLike,
